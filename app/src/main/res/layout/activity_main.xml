@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:src="@drawable/ic_logo"/>
+
+    <TextView
+        android:id="@+id/appNameText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cryptify"
+        android:textSize="24sp"
+        android:textColor="@color/primary"
+        android:textStyle="bold"
+        android:layout_below="@id/logoImage"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"/>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/appNameText"
+        android:layout_marginTop="40dp"
+        android:layout_marginHorizontal="40dp"
+        android:columnCount="2"
+        android:rowCount="2"
+        android:layout_centerHorizontal="true">
+
+        <Button
+            android:id="@+id/btnEncrypt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="Encrypt"
+            android:drawableTop="@drawable/ic_lock"
+
+            android:textColor="@color/white"
+            android:layout_margin="10dp"/>
+
+        <Button
+            android:id="@+id/btnDecrypt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="Decrypt"
+            android:drawableTop="@drawable/ic_lock"
+
+            android:textColor="@color/white"
+            android:layout_margin="10dp"/>
+
+        <Button
+            android:id="@+id/btnRsaGenerator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="RSA generator"
+            android:drawableTop="@drawable/ic_lock"
+
+            android:textColor="@color/white"
+            android:layout_margin="10dp"/>
+
+        <Button
+            android:id="@+id/btnRsaEncryption"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="RSA encryption"
+            android:drawableTop="@drawable/ic_lock"
+
+            android:textColor="@color/white"
+            android:layout_margin="10dp"/>
+
+    </GridLayout>
+
+    <TextView
+        android:id="@+id/copyrightText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Copyright 2025 ©"
+        android:textSize="14sp"
+        android:textColor="@color/black"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"/>
+</RelativeLayout>
