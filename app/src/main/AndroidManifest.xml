@@ -3,24 +3,35 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:allowBackup="true"      
+        android:dataExtractionRules="@xml/data_extraction_rules" 
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher" 
+        android:label="@string/app_name"   
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Cryptify"
+        android:theme="@style/Theme.Cryptify" 
         tools:targetApi="31">
+        // Activité principale (point d'entrée)
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:name=".IntroActivity"
+            android:exported="true">     // Peut être lancée par d'autres apps
+            <intent-filter>              // Filtre d'intention
+                <action android:name="android.intent.action.MAIN" /> // Action principale
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER" /> // Apparaît dans le launcher
             </intent-filter>
         </activity>
+
+        // Autres activités de l'application
+        <activity 
+            android:name=".SignInActivity"
+            android:exported="false" />   // Non accessible depuis l'extérieur
+            
+        <activity 
+            android:name=".SignUpActivity"
+            android:exported="false" />
+            
     </application>
 
 </manifest>
