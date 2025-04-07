@@ -41,7 +41,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void initializeViews() {
         usernameInput = findViewById(R.id.usernameInput);
-        emailInput = findViewById(R.id.emailInput);
+        //emailInput = findViewById(R.id.emailInput);
         passwordInput = findViewById(R.id.passwordInput);
         confirmPasswordInput = findViewById(R.id.confirmPasswordInput);
         btnSignUp = findViewById(R.id.btnSignUp);
@@ -72,11 +72,11 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void handleSignUp() {
         String username = usernameInput.getText().toString().trim();
-        String email = emailInput.getText().toString().trim();
+        //String email = emailInput.getText().toString().trim();
         String password = passwordInput.getText().toString().trim();
         String confirmPassword = confirmPasswordInput.getText().toString().trim();
 
-        if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+        if (username.isEmpty() /*|| email.isEmpty() */|| password.isEmpty() || confirmPassword.isEmpty()) {
             showErrorDialog("incomplete", "please fill all fields");
             return;
         }
@@ -92,7 +92,7 @@ public class SignUpActivity extends AppCompatActivity {
         }
 
         // Simuler la vérification d'un utilisateur existant
-        if (username.equals("test") || email.equals("test@test.com")) {
+        if (username.equals("test") /*|| email.equals("test@test.com")*/) {
             showUserExistsDialog();
             return;
         }
