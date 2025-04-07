@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.cryptify"
-        minSdk = 21
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -44,6 +44,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation("com.google.code.gson:gson:2.8.9")
+    implementation("com.google.code.gson:gson:2.12.1")
     implementation ("com.squareup.okhttp3:okhttp:4.12.0")
 }
