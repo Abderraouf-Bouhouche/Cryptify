@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <!-- Logo Cryptify en haut -->
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:src="@drawable/logo_1"/>
+
+    <!-- Icône Wi-Fi déconnecté -->
+    <ImageView
+        android:id="@+id/offlineIcon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_below="@id/logoImage"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:src="@drawable/not_connected"/>
+
+    <!-- Message "Setting up servers..." -->
+    <TextView
+        android:id="@+id/offlineTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/offlineIcon"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:text="Setting up servers..."
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"/>
+
+    <!-- Bouton Retry avec l'icône -->
+    <ImageButton
+        android:id="@+id/retryButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_below="@id/offlineTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/retry"
+        android:contentDescription="Retry connection"/>
+
+    <!-- Icône de chargement (vous pouvez utiliser une ProgressBar circulaire) -->
+    <ProgressBar
+        android:id="@+id/loadingSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/offlineTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:indeterminateTint="@color/purple"/>
+
+    <!-- Copyright en bas -->
+    <TextView
+        android:id="@+id/copyrightText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Copyright 2025 ©"
+        android:textSize="14sp"
+        android:textColor="@color/black"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"/>
+
+</RelativeLayout> 
