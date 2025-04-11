@@ -1,5 +1,9 @@
 package com.example.cryptify;
 
+import static com.example.cryptify.Functions.signUp;
+
+import static java.lang.Thread.sleep;
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,8 +16,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -25,8 +30,10 @@ public class SignUpActivity extends AppCompatActivity {
     private boolean passwordVisible = false;
     private boolean confirmPasswordVisible = false;
 
+    private Dialog loadingDialog;
+
     // Constantes pour la validation du mot de passe
-    private static final int MIN_PASSWORD_LENGTH = 16;
+    private static final int MIN_PASSWORD_LENGTH = 8;
     private static final Pattern PASSWORD_PATTERN = Pattern
             .compile("^(?=.*[0-9])(?=.*[a-zA-Z]).{" + MIN_PASSWORD_LENGTH + ",}$");
 
@@ -72,17 +79,16 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void handleSignUp() {
         String username = usernameInput.getText().toString().trim();
-        //String email = emailInput.getText().toString().trim();
         String password = passwordInput.getText().toString().trim();
         String confirmPassword = confirmPasswordInput.getText().toString().trim();
 
-        if (username.isEmpty() /*|| email.isEmpty() */|| password.isEmpty() || confirmPassword.isEmpty()) {
+        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             showErrorDialog("incomplete", "please fill all fields");
             return;
         }
 
         if (!isValidPassword(password)) {
-            showErrorDialog("invalid password", "minimum 16 characters\nwith letters and numbers");
+            showErrorDialog("invalid password", "minimum 8 characters\nwith letters and numbers");
             return;
         }
 
@@ -90,20 +96,20 @@ public class SignUpActivity extends AppCompatActivity {
             showErrorDialog("password and confirmation", "doesn't match");
             return;
         }
-
-        // Simuler la vérification d'un utilisateur existant
-        if (username.equals("test") /*|| email.equals("test@test.com")*/) {
-            showUserExistsDialog();
-            return;
-        }
-
         showLoadingDialog();
         // TODO: Implémenter la logique d'inscription
-        // Simuler un délai pour le chargement
-        btnSignUp.postDelayed(() -> {
-            startActivity(new Intent(SignUpActivity.this, MainActivity.class));
-            finish();
-        }, 2000);
+        username=signUp(username, password, this);
+        hideLoadingDialog();
+            if (username == null) {
+                showUserExistsDialog();
+                return;
+            }
+            // Simuler un délai pour le chargement
+        String finalUsername = username;
+                Intent intent=new  Intent(SignUpActivity.this, MainActivity.class);
+                intent.putExtra("username", finalUsername);
+                startActivity(intent);
+                finish();
     }
 
     private void showBlurView() {
@@ -159,29 +165,27 @@ public class SignUpActivity extends AppCompatActivity {
     private void showLoadingDialog() {
         showBlurView();
 
-        Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.custom_error_dialog);
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        dialog.setCancelable(false);
+        loadingDialog = new Dialog(this);
+        loadingDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        loadingDialog.setContentView(R.layout.custom_error_dialog);
+        loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        loadingDialog.setCancelable(false);
 
-        ImageView icon = dialog.findViewById(R.id.dialogIcon);
-        TextView titleText = dialog.findViewById(R.id.dialogTitle);
-        TextView messageText = dialog.findViewById(R.id.dialogMessage);
-        Button btnOk = dialog.findViewById(R.id.btnOk);
+        ImageView icon = loadingDialog.findViewById(R.id.dialogIcon);
+        TextView titleText = loadingDialog.findViewById(R.id.dialogTitle);
+        TextView messageText = loadingDialog.findViewById(R.id.dialogMessage);
+        Button btnOk = loadingDialog.findViewById(R.id.btnOk);
 
         icon.setImageResource(R.drawable.user_grey);
         titleText.setVisibility(TextView.GONE);
         messageText.setText("User creation....");
         btnOk.setVisibility(Button.GONE);
 
-        dialog.show();
-
-        // Fermer le dialogue après 2 secondes
-        new android.os.Handler().postDelayed(() -> {
-            dialog.dismiss();
-            hideBlurView();
-        }, 2000);
+        loadingDialog.show();
+    }
+    private void hideLoadingDialog(){
+        loadingDialog.dismiss();
+        hideBlurView();
     }
 
     private boolean isValidPassword(String password) {
@@ -191,6 +195,7 @@ public class SignUpActivity extends AppCompatActivity {
     private void updatePasswordVisibility(EditText input, ImageButton toggle, boolean visible) {
         if (visible) {
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            input.setTextAppearance(R.font.robocode);
             toggle.setImageResource(R.drawable.vissibility_on);
         } else {
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -214,7 +219,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         icon.setImageResource(R.drawable.user_grey);
         titleText.setText("user exists");
-        messageText.setText("this username or email\nis already registered");
+        messageText.setText("this username\nis already registered");
         btnOk.setOnClickListener(v -> {
             dialog.dismiss();
             hideBlurView();

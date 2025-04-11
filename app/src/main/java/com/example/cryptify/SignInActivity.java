@@ -1,5 +1,7 @@
 package com.example.cryptify;
 
+import static com.example.cryptify.Functions.signIn;
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +24,7 @@ public class SignInActivity extends AppCompatActivity {
     private TextView toggleLink;
     private ImageButton togglePassword;
     private View blurView;
+    private Dialog loadingDialog;
     private boolean passwordVisible = false;
 
     // Constantes pour la validation du mot de passe
@@ -95,15 +99,18 @@ public class SignInActivity extends AppCompatActivity {
             showErrorDialog("incomplete", "please fill all fields");
             return;
         }
-
-        if (!isValidPassword(password)) {
-            showErrorDialog("incorrect", "username or password");
+        showLoadingDialog();
+        username=signIn(username,password,this);
+        hideLoadingDialog();
+        if(username==null){
+            showErrorDialog("Authentification failed","incorrect username or password");
             return;
         }
-
-        // TODO: Implémenter la vérification des identifiants
-        // Pour l'exemple, on simule une erreur d'authentification
-        showErrorDialog("incorrect", "username or password");
+        String finalUsername=username;
+        Intent intent=new  Intent(SignInActivity.this, MainActivity.class);
+        intent.putExtra("username", finalUsername);
+        startActivity(intent);
+        finish();
     }
 
     private void showErrorDialog(String title, String message) {
@@ -135,12 +142,39 @@ public class SignInActivity extends AppCompatActivity {
 
     private void updatePasswordVisibility() {
         if (passwordVisible) {
-            passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD );
+            passwordInput.setTextAppearance(R.font.robocode);
             togglePassword.setImageResource(R.drawable.vissibility_on);
         } else {
             passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
             togglePassword.setImageResource(R.drawable.visibility_off);
         }
         passwordInput.setSelection(passwordInput.getText().length());
+    }
+
+    private void showLoadingDialog() {
+        showBlurView();
+
+        loadingDialog = new Dialog(this);
+        loadingDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        loadingDialog.setContentView(R.layout.custom_error_dialog);
+        loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        loadingDialog.setCancelable(false);
+
+        ImageView icon = loadingDialog.findViewById(R.id.dialogIcon);
+        TextView titleText = loadingDialog.findViewById(R.id.dialogTitle);
+        TextView messageText = loadingDialog.findViewById(R.id.dialogMessage);
+        Button btnOk = loadingDialog.findViewById(R.id.btnOk);
+
+        icon.setImageResource(R.drawable.user_grey);
+        titleText.setVisibility(TextView.GONE);
+        messageText.setText("authentification....");
+        btnOk.setVisibility(Button.GONE);
+
+        loadingDialog.show();
+    }
+    private void hideLoadingDialog(){
+        loadingDialog.dismiss();
+        hideBlurView();
     }
 }

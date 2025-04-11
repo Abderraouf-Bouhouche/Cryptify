@@ -19,100 +19,60 @@
     <!-- Logo -->
     <ImageView
         android:id="@+id/logo"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="145dp"
+        android:layout_height="149dp"
         android:layout_below="@id/backButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:src="@drawable/logo_1" />
 
     <!-- Public Key Container -->
+
+    <!-- Private Key Container -->
+
+    <!-- Generate Button -->
+
+    <!-- Copyright -->
+
     <LinearLayout
         android:id="@+id/publicKeyContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="372dp"
+        android:layout_height="389dp"
         android:layout_below="@id/logo"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="35dp"
         android:background="@drawable/input_background"
+        android:backgroundTint="#5400FF"
         android:orientation="vertical"
         android:padding="16dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="public key"
+            android:fontFamily="@font/technocharm"
+            android:text="Public key"
             android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textSize="18dp" />
 
         <TextView
             android:id="@+id/publicKeyText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="258dp"
             android:layout_marginTop="8dp"
-            android:textColor="@color/white"
+            android:fontFamily="@font/robocode"
+            android:textColor="#85FFFFFF"
             android:textSize="14sp" />
 
         <ImageButton
             android:id="@+id/copyPublicKeyButton"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_gravity="end"
             android:layout_marginTop="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/copy"
-            android:tint="@color/white" />
+            android:src="@drawable/copy" />
+
     </LinearLayout>
 
-    <!-- Private Key Container -->
-    <LinearLayout
-        android:id="@+id/privateKeyContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/publicKeyContainer"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/input_background"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="private key"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/privateKeyText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textColor="@color/white"
-            android:textSize="14sp" />
-
-        <ImageButton
-            android:id="@+id/copyPrivateKeyButton"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="end"
-            android:layout_marginTop="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/copy"
-            android:tint="@color/white" />
-    </LinearLayout>
-
-    <!-- Generate Button -->
-    <Button
-        android:id="@+id/generateButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/copyright"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/rounded_button_background"
-        android:text="Generate"
-        android:textColor="@color/white"
-        android:textSize="16sp" />
-
-    <!-- Copyright -->
     <TextView
         android:id="@+id/copyright"
         android:layout_width="wrap_content"

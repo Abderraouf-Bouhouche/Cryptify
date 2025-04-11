@@ -1,5 +1,7 @@
 package com.example.cryptify;
 
+import static com.example.cryptify.Functions.getPublicKey;
+
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -14,19 +16,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
 public class RsaKeysActivity extends AppCompatActivity {
     private ImageButton backButton;
-    private TextView publicKeyText, privateKeyText;
-    private ImageButton copyPublicKeyButton, copyPrivateKeyButton;
+    private TextView publicKeyText;
+    private ImageButton copyPublicKeyButton;
     private Button generateButton;
     private View blurView;
-
-    private KeyPair currentKeyPair;
+    private Dialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,47 +37,26 @@ public class RsaKeysActivity extends AppCompatActivity {
     private void initializeViews() {
         backButton = findViewById(R.id.backButton);
         publicKeyText = findViewById(R.id.publicKeyText);
-        privateKeyText = findViewById(R.id.privateKeyText);
         copyPublicKeyButton = findViewById(R.id.copyPublicKeyButton);
-        copyPrivateKeyButton = findViewById(R.id.copyPrivateKeyButton);
-        generateButton = findViewById(R.id.generateButton);
         blurView = findViewById(R.id.blurView);
+        loadKeys();
     }
 
     private void setupClickListeners() {
         backButton.setOnClickListener(v -> finish());
-
-        generateButton.setOnClickListener(v -> generateKeys());
-
         copyPublicKeyButton.setOnClickListener(v -> copyToClipboard("Public Key", publicKeyText.getText().toString()));
-        copyPrivateKeyButton
-                .setOnClickListener(v -> copyToClipboard("Private Key", privateKeyText.getText().toString()));
     }
 
-    private void generateKeys() {
+    private void loadKeys() {
         showLoadingDialog();
-
-        new Thread(() -> {
-            try {
-                KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-                generator.initialize(2048);
-                currentKeyPair = generator.generateKeyPair();
-
-                String publicKey = Base64.getEncoder().encodeToString(currentKeyPair.getPublic().getEncoded());
-                String privateKey = Base64.getEncoder().encodeToString(currentKeyPair.getPrivate().getEncoded());
-
-                runOnUiThread(() -> {
-                    publicKeyText.setText(publicKey);
-                    privateKeyText.setText(privateKey);
-                    showSuccessDialog();
-                });
-
-            } catch (NoSuchAlgorithmException e) {
-                runOnUiThread(() -> {
-                    showErrorDialog("Error", "Failed to generate RSA keys");
-                });
+            String username = getIntent().getStringExtra("username");
+            String publicKey = getPublicKey(username, this);
+            if(publicKey==null){
+                showErrorDialog("Oops","failed loading key");
+                return;
             }
-        }).start();
+            hideLoadingDialog();
+            publicKeyText.setText(publicKey);
     }
 
     private void copyToClipboard(String label, String text) {
@@ -143,23 +119,27 @@ public class RsaKeysActivity extends AppCompatActivity {
     private void showLoadingDialog() {
         showBlurView();
 
-        Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.custom_error_dialog);
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        dialog.setCancelable(false);
+        loadingDialog = new Dialog(this);
+        loadingDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        loadingDialog.setContentView(R.layout.custom_error_dialog);
+        loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        loadingDialog.setCancelable(false);
 
-        ImageView icon = dialog.findViewById(R.id.dialogIcon);
-        TextView titleText = dialog.findViewById(R.id.dialogTitle);
-        TextView messageText = dialog.findViewById(R.id.dialogMessage);
-        Button btnOk = dialog.findViewById(R.id.btnOk);
+        ImageView icon = loadingDialog.findViewById(R.id.dialogIcon);
+        TextView titleText = loadingDialog.findViewById(R.id.dialogTitle);
+        TextView messageText = loadingDialog.findViewById(R.id.dialogMessage);
+        Button btnOk = loadingDialog.findViewById(R.id.btnOk);
 
         icon.setImageResource(R.drawable.key);
         titleText.setVisibility(View.GONE);
         messageText.setText("Generating RSA keys...");
         btnOk.setVisibility(View.GONE);
 
-        dialog.show();
+        loadingDialog.show();
+    }
+    private void hideLoadingDialog() {
+        loadingDialog.dismiss();
+        hideBlurView();
     }
 
     private void showSuccessDialog() {

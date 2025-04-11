@@ -15,9 +15,9 @@
 
         <ImageView
             android:id="@+id/logoImage"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_marginTop="60dp"
+            android:layout_width="94dp"
+            android:layout_height="132dp"
+            android:layout_marginTop="40dp"
             android:src="@drawable/logo_1" />
 
         <TextView
@@ -25,16 +25,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="@font/technocharm"
             android:text="Sign In"
             android:textColor="@color/black"
-            android:textSize="24sp" />
+            android:textSize="48sp" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="64dp"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="@font/robocode"
+            android:text="User name"
+            android:textColor="#1E293B"
+            android:textSize="14sp" />
 
         <LinearLayout
             android:id="@+id/usernameContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
             android:background="@drawable/edit_text_background"
             android:gravity="center_vertical"
             android:padding="16dp">
@@ -51,15 +61,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@null"
-                android:hint="User name"
-                android:textSize="15sp" />
+                android:fontFamily="@font/robocode"
+                android:textColor="#475569"
+                android:textSize="16sp" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="@font/robocode"
+            android:text="Password"
+            android:textColor="#1E293B"
+            android:textSize="14sp" />
 
         <LinearLayout
             android:id="@+id/passwordContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:background="@drawable/edit_text_background"
             android:gravity="center_vertical"
             android:padding="16dp">
@@ -73,13 +94,14 @@
 
             <EditText
                 android:id="@+id/passwordInput"
-                android:layout_width="0dp"
+                android:layout_width="146dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@null"
-                android:hint="Password"
+                android:fontFamily="@font/robocode"
                 android:inputType="textPassword"
-                android:textSize="15sp" />
+                android:textColor="#475569"
+                android:textSize="16sp" />
 
             <ImageButton
                 android:id="@+id/togglePassword"
@@ -94,28 +116,35 @@
             android:id="@+id/btnSignIn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="30dp"
             android:background="@drawable/button_background"
+            android:fontFamily="@font/robocode"
             android:padding="16dp"
             android:text="Sign In"
             android:textAllCaps="false"
             android:textColor="@color/white"
+            android:drawableRight="@drawable/submit"
             android:textSize="16sp" />
+
 
         <TextView
             android:id="@+id/toggleLink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Don't have an account? Sign Up."
-            android:textColor="#99000000"
-            android:textSize="14sp" />
+            android:layout_marginBottom="70dp"
+            android:fontFamily="@font/robocode"
+            android:padding="6dp"
+            android:text="@string/sign_up_message"
+            android:textColor="#1E293B"
+            android:textSize="14sp"></TextView>
 
         <TextView
             android:id="@+id/copyrightText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
+            android:fontFamily="@font/robocode"
             android:text="Copyright 2025 ©"
             android:textColor="#99000000"
             android:textSize="12sp" />

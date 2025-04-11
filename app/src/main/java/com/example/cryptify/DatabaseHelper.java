@@ -64,6 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (cursor != null) {
                 cursor.close();
             }
+            MyDatabase.close();
         }
     }
 
@@ -77,6 +78,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (cursor != null) {
                 cursor.close();
             }
+            MyDatabase.close();
         }
+    }
+
+    public String getPublicKeyByUsername(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String publicKey = null;
+
+        // Define the query
+        String[] columns = {"publickey"};
+        String selection = "username=?";
+        String[] selectionArgs = {username};
+
+        Cursor cursor = db.query(
+                TABLE_USERS,  // table name
+                columns,            // columns to return
+                selection,          // WHERE clause
+                selectionArgs,      // WHERE arguments
+                null, null, null
+        );
+
+        if (cursor.moveToFirst()) {
+            publicKey = cursor.getString(0);
+        }
+
+        cursor.close();
+        db.close();
+
+        return publicKey;
     }
 }

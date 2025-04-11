@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         rsaKeysButton.setOnClickListener(v -> {
             if (OfflineActivity.checkNetworkConnection(this)) {
                 Intent intent = new Intent(MainActivity.this, RsaKeysActivity.class);
+                intent.putExtra("username",getIntent().getStringExtra("username"));
                 startActivity(intent);
             } else {
                 OfflineActivity.checkAndShowOffline(this);
