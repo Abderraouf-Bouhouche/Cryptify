@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:blur="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/dialog_background"
@@ -19,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="16dp"
-        android:fontFamily="monospace"
+        android:fontFamily="@font/robocode"
         android:text="incorrect"
         android:textColor="#000000"
         android:textSize="16sp" />
@@ -30,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="8dp"
-        android:fontFamily="monospace"
+        android:fontFamily="@font/robocode"
         android:text="username or password"
         android:textColor="#6C3EF8"
         android:textSize="14sp" />
@@ -40,9 +45,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:background="@drawable/button_background"
+        android:backgroundTint="#5400FF"
         android:fontFamily="monospace"
         android:text="OK"
-        android:textColor="#FFFFFF" />
-
-</LinearLayout> 
+        android:textColor="#FFFFFF"
+        android:textColorHint="#5400ff"
+        android:textColorLink="#5400FF"
+        app:iconTint="#5400FF" />
+</LinearLayout>

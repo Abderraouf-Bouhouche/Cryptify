@@ -1,12 +1,15 @@
 package com.example.cryptify;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
 import static com.example.cryptify.Functions.signIn;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
@@ -17,6 +20,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.regex.Pattern;
+
+import eightbitlab.com.blurview.BlurView;
+import eightbitlab.com.blurview.RenderScriptBlur;
 
 public class SignInActivity extends AppCompatActivity {
     private EditText usernameInput, passwordInput;
