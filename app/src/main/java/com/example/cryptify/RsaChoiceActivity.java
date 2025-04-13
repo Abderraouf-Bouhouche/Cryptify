@@ -1,14 +1,11 @@
 package com.example.cryptify;
 
-import static com.example.cryptify.Functions.getPublicKey;
-
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -44,15 +41,7 @@ public class RsaChoiceActivity extends AppCompatActivity {
                     return;
                 }
                 
-                String publicKey = getPublicKey(username, this);
-                if (publicKey == null) {
-                    showErrorDialog("Error", "Failed to load RSA key");
-                    return;
-                }
-
                 Intent intent = new Intent(RsaChoiceActivity.this, RsaEncryptionActivity.class);
-                intent.putExtra("username", username);
-                intent.putExtra("publicKey", publicKey);
                 startActivity(intent);
             } else {
                 OfflineActivity.checkAndShowOffline(this);
@@ -61,7 +50,13 @@ public class RsaChoiceActivity extends AppCompatActivity {
 
         decryptButton.setOnClickListener(v -> {
             if (OfflineActivity.checkNetworkConnection(this)) {
-                Intent intent = new Intent(RsaChoiceActivity.this, DecryptActivity.class);
+                String username = getIntent().getStringExtra("username");
+                if (username == null) {
+                    showErrorDialog("Error", "User information not found");
+                    return;
+                }
+                Intent intent = new Intent(RsaChoiceActivity.this, RsaDecryptionActivity.class);
+                intent.putExtra("username",username);
                 startActivity(intent);
             } else {
                 OfflineActivity.checkAndShowOffline(this);

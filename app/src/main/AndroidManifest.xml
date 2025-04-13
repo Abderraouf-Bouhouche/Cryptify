@@ -62,7 +62,17 @@
         <activity
             android:name=".RsaChoiceActivity"
             android:exported="false" />
-            
+
+        <activity android:name=".RsaDecryptionActivity"
+            android:exported="false"/>
+
+        <activity android:name=".RsaEcryptionResultActivity"
+            android:exported="false"/>
+
+        <activity android:name=".RsaDecryptionResultActivity"
+            android:exported="false"/>
+
     </application>
+
 
 </manifest>

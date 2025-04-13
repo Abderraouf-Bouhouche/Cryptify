@@ -9,6 +9,9 @@ import com.example.cryptify.RSA.*;
 
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 
 public class Functions {
 
@@ -53,6 +56,25 @@ public class Functions {
         String publicKey=dbHelper.getPublicKeyByUsername(username);
         return publicKey;
     }
+    public static String getPrivateKey(String username,@Nullable Context context){
+        DatabaseHelper dbHelper=new DatabaseHelper(context);
+        String privateKey=dbHelper.getPrivateKeyByUsername(username);
+        return privateKey;
+    }
 
+    public static String encryptRsa(String message,String publicKey) throws Exception {
+        RsaImplementer rsaImplementer=new RsaImplementer();
+        PublicKey key=rsaImplementer.stringToPublicKey(publicKey);
+        message=rsaImplementer.encrypt(key,message);
+        return message;
+    }
+
+    public static String decryptRsa(String encryptedMessage,String name,Context context) throws Exception {
+        RsaImplementer rsaImplementer=new RsaImplementer();
+        String privateKeyStr=getPrivateKey(name,context);
+        PrivateKey privateKey=rsaImplementer.stringToPrivateKey(privateKeyStr);
+        String message=rsaImplementer.decrypt(privateKey,encryptedMessage);
+        return message;
+    }
 
 }

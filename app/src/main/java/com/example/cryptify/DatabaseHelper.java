@@ -108,4 +108,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return publicKey;
     }
+
+    public String getPrivateKeyByUsername(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String privateKey= null;
+
+        // Define the query
+        String[] columns = {"privatekey"};
+        String selection = "username=?";
+        String[] selectionArgs = {username};
+
+        Cursor cursor = db.query(
+                TABLE_USERS,  // table name
+                columns,            // columns to return
+                selection,          // WHERE clause
+                selectionArgs,      // WHERE arguments
+                null, null, null
+        );
+
+        if (cursor.moveToFirst()) {
+            privateKey= cursor.getString(0);
+        }
+
+        cursor.close();
+        db.close();
+
+        return privateKey;
+    }
 }

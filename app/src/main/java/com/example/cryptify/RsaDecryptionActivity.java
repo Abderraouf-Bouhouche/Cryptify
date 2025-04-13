@@ -1,6 +1,7 @@
 package com.example.cryptify;
 
-import static com.example.cryptify.Functions.encryptRsa;
+
+import static com.example.cryptify.Functions.decryptRsa;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -15,64 +16,62 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class RsaEncryptionActivity extends AppCompatActivity {
+public class RsaDecryptionActivity extends AppCompatActivity {
     private ImageButton backButton;
     private EditText publicKeyInput;
     private EditText messageInput;
-    private Button encryptButton;
+    private Button decryptButton;
     private View blurView;
     private Dialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_rsa_encryption);
+        setContentView(R.layout.activity_rsa_decryption);
 
         try {
             initializeViews();
             setupClickListeners();
         } catch (Exception e) {
             e.printStackTrace();
-            showErrorDialog("Error", "Failed to initialize encryption");
+            showErrorDialog("Error", "Failed to initialize decryption");
             finish();
         }
     }
 
     private void initializeViews() {
         backButton = findViewById(R.id.backButton);
-        publicKeyInput = findViewById(R.id.publicKeyInput);
         messageInput = findViewById(R.id.messageInput);
-        encryptButton = findViewById(R.id.encryptButton);
+        decryptButton= findViewById(R.id.decryptButton);
         blurView = findViewById(R.id.blurView);
     }
 
     private void setupClickListeners() {
         backButton.setOnClickListener(v -> finish());
-        encryptButton.setOnClickListener(v -> handleEncryption());
+        decryptButton.setOnClickListener(v -> handleDecryption());
     }
 
-    private void handleEncryption() {
-        String publicKeyStr = publicKeyInput.getText().toString().trim();
+    private void handleDecryption() {
         String message = messageInput.getText().toString().trim();
 
-        if (publicKeyStr.isEmpty() || message.isEmpty()) {
+        if ( message.isEmpty()) {
             showErrorDialog("incomplete", "please fill all fields");
             return;
         }
 
         showLoadingDialog();
-        
+
         try {
-            String encryptedMessage=encryptRsa(message,publicKeyStr);
+            String decryptedMessage=decryptRsa(message, getIntent().getStringExtra("username"),this);
             hideLoadingDialog();
-            Intent intent=new Intent(RsaEncryptionActivity.this,RsaEcryptionResultActivity.class);
-            intent.putExtra("encryptedMessage",encryptedMessage);
+            Intent intent=new Intent(RsaDecryptionActivity.this,RsaDecryptionResultActivity.class);
+            intent.putExtra("decryptedMessage",decryptedMessage);
             startActivity(intent);
             finish();
         } catch (Exception e) {
             e.printStackTrace();
             hideLoadingDialog();
-            showErrorDialog("Encryption failed", "Please check your public key");
+            showErrorDialog("Decryption failed", "this message is not meant for you");
         }
     }
 
