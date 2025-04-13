@@ -25,6 +25,7 @@ public class EncryptActivity extends AppCompatActivity {
     private ImageButton backButton;
     private LinearLayout imageSelectionContainer;
     private ImageView selectedImage;
+    private ImageButton clearImageButton;
     private EditText key1Input, key2Input, messageInput;
     private Button encryptButton;
     private View blurView;
@@ -34,7 +35,6 @@ public class EncryptActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_encrypt);
-
         initializeViews();
         setupClickListeners();
     }
@@ -43,6 +43,7 @@ public class EncryptActivity extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
         imageSelectionContainer = findViewById(R.id.imageSelectionContainer);
         selectedImage = findViewById(R.id.selectedImage);
+        clearImageButton = findViewById(R.id.clearImageButton);
         key1Input = findViewById(R.id.key1Input);
         key2Input = findViewById(R.id.key2Input);
         messageInput = findViewById(R.id.messageInput);
@@ -52,15 +53,20 @@ public class EncryptActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         backButton.setOnClickListener(v -> finish());
-
         imageSelectionContainer.setOnClickListener(v -> openImagePicker());
-
+        clearImageButton.setOnClickListener(v -> clearSelectedImage());
         encryptButton.setOnClickListener(v -> handleEncryption());
     }
 
     private void openImagePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    private void clearSelectedImage() {
+        selectedImageUri = null;
+        selectedImage.setImageResource(R.drawable.image);
+        clearImageButton.setVisibility(View.GONE);
     }
 
     @Override
@@ -71,12 +77,12 @@ public class EncryptActivity extends AppCompatActivity {
             selectedImageUri = data.getData();
             if (selectedImageUri != null) {
                 selectedImage.setImageURI(selectedImageUri);
+                clearImageButton.setVisibility(View.VISIBLE);
                 // Vérifier le format de l'image
                 String mimeType = getContentResolver().getType(selectedImageUri);
                 if (mimeType != null && !mimeType.startsWith("image/jpeg") && !mimeType.startsWith("image/png")) {
                     showErrorDialog("Non supported image", "format\n\nuse PNG or JPG");
-                    selectedImage.setImageResource(R.drawable.image);
-                    selectedImageUri = null;
+                    clearSelectedImage();
                 }
             }
         }
@@ -152,7 +158,9 @@ public class EncryptActivity extends AppCompatActivity {
         TextView titleText = dialog.findViewById(R.id.dialogTitle);
         TextView messageText = dialog.findViewById(R.id.dialogMessage);
         Button btnOk = dialog.findViewById(R.id.btnOk);
+        ImageView icon = dialog.findViewById(R.id.dialogIcon);
 
+        icon.setImageResource(R.drawable.image);
         titleText.setText(title);
         messageText.setText(message);
         btnOk.setOnClickListener(v -> {

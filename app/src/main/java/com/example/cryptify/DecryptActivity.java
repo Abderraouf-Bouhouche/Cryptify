@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
 import android.view.animation.AlphaAnimation;
@@ -11,33 +12,41 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.regex.Pattern;
 
 public class DecryptActivity extends AppCompatActivity {
-    private static final int PICK_FILE_REQUEST = 1;
+    private static final int PICK_IMAGE_REQUEST = 1;
+    private static final int PICK_FILE_REQUEST = 2;
     private static final int MIN_KEY_LENGTH = 16;
     private static final Pattern KEY_PATTERN = Pattern.compile("^.{" + MIN_KEY_LENGTH + ",}$");
 
     private ImageButton backButton;
+    private LinearLayout imageSelectionContainer;
+    private ImageView selectedImage;
+    private ImageButton clearImageButton;
     private EditText encryptedInput;
     private EditText key1Input, key2Input;
     private Button decryptButton;
     private ImageButton folderButton;
     private View blurView;
+    private Uri selectedImageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_decrypt);
-
         initializeViews();
         setupClickListeners();
     }
 
     private void initializeViews() {
         backButton = findViewById(R.id.backButton);
+        imageSelectionContainer = findViewById(R.id.imageSelectionContainer);
+        selectedImage = findViewById(R.id.selectedImage);
+        clearImageButton = findViewById(R.id.clearImageButton);
         encryptedInput = findViewById(R.id.encryptedInput);
         key1Input = findViewById(R.id.key1Input);
         key2Input = findViewById(R.id.key2Input);
@@ -48,10 +57,21 @@ public class DecryptActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         backButton.setOnClickListener(v -> finish());
-
+        imageSelectionContainer.setOnClickListener(v -> openImagePicker());
+        clearImageButton.setOnClickListener(v -> clearSelectedImage());
         folderButton.setOnClickListener(v -> openFilePicker());
-
         decryptButton.setOnClickListener(v -> handleDecryption());
+    }
+
+    private void openImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    private void clearSelectedImage() {
+        selectedImageUri = null;
+        selectedImage.setImageResource(R.drawable.image);
+        clearImageButton.setVisibility(View.GONE);
     }
 
     private void openFilePicker() {
@@ -64,7 +84,19 @@ public class DecryptActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PICK_FILE_REQUEST && resultCode == RESULT_OK && data != null) {
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            selectedImageUri = data.getData();
+            if (selectedImageUri != null) {
+                selectedImage.setImageURI(selectedImageUri);
+                clearImageButton.setVisibility(View.VISIBLE);
+                // Vérifier le format de l'image
+                String mimeType = getContentResolver().getType(selectedImageUri);
+                if (mimeType != null && !mimeType.startsWith("image/jpeg") && !mimeType.startsWith("image/png")) {
+                    showErrorDialog("Non supported image", "format\n\nuse PNG or JPG");
+                    clearSelectedImage();
+                }
+            }
+        } else if (requestCode == PICK_FILE_REQUEST && resultCode == RESULT_OK && data != null) {
             Uri fileUri = data.getData();
             // TODO: Lire le contenu du fichier et le mettre dans encryptedInput
             encryptedInput.setText("Contenu chiffré du fichier");
