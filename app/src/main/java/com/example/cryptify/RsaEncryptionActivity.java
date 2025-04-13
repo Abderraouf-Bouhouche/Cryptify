@@ -12,20 +12,37 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.cryptify.RSA.RsaImplementer;
+
+import java.security.PublicKey;
+
 public class RsaEncryptionActivity extends AppCompatActivity {
     private ImageButton backButton;
     private EditText publicKeyInput;
     private EditText messageInput;
     private Button encryptButton;
     private View blurView;
+    private Dialog loadingDialog;
+    private RsaImplementer rsaImplementer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rsa_encryption);
 
-        initializeViews();
-        setupClickListeners();
+        try {
+            rsaImplementer = new RsaImplementer();
+            initializeViews();
+            setupClickListeners();
+            String publicKey = getIntent().getStringExtra("publicKey");
+            if (publicKey != null) {
+                publicKeyInput.setText(publicKey);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showErrorDialog("Error", "Failed to initialize encryption");
+            finish();
+        }
     }
 
     private void initializeViews() {
@@ -38,52 +55,62 @@ public class RsaEncryptionActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         backButton.setOnClickListener(v -> finish());
-
         encryptButton.setOnClickListener(v -> handleEncryption());
     }
 
     private void handleEncryption() {
-        String publicKey = publicKeyInput.getText().toString().trim();
+        String publicKeyStr = publicKeyInput.getText().toString().trim();
         String message = messageInput.getText().toString().trim();
 
-        if (publicKey.isEmpty() || message.isEmpty()) {
+        if (publicKeyStr.isEmpty() || message.isEmpty()) {
             showErrorDialog("incomplete", "please fill all fields");
             return;
         }
 
         showLoadingDialog();
-        // TODO: Implémenter la logique de chiffrement RSA
-        // Simuler un délai pour le chargement
-        new android.os.Handler().postDelayed(() -> {
+        
+        try {
+            PublicKey publicKey = rsaImplementer.stringToPublicKey(publicKeyStr);
+            String encryptedMessage = rsaImplementer.encrypt(publicKey, message);
+            hideLoadingDialog();
             showSuccessDialog();
-        }, 2000);
+            // TODO: Sauvegarder ou partager le message chiffré
+        } catch (Exception e) {
+            e.printStackTrace();
+            hideLoadingDialog();
+            showErrorDialog("Encryption failed", "Please check your public key");
+        }
     }
 
     private void showBlurView() {
-        blurView.setVisibility(View.VISIBLE);
-        AlphaAnimation animation = new AlphaAnimation(0f, 1f);
-        animation.setDuration(300);
-        blurView.startAnimation(animation);
+        if (blurView != null) {
+            blurView.setVisibility(View.VISIBLE);
+            AlphaAnimation animation = new AlphaAnimation(0f, 1f);
+            animation.setDuration(300);
+            blurView.startAnimation(animation);
+        }
     }
 
     private void hideBlurView() {
-        AlphaAnimation animation = new AlphaAnimation(1f, 0f);
-        animation.setDuration(300);
-        animation.setAnimationListener(new android.view.animation.Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(android.view.animation.Animation animation) {
-            }
+        if (blurView != null) {
+            AlphaAnimation animation = new AlphaAnimation(1f, 0f);
+            animation.setDuration(300);
+            animation.setAnimationListener(new android.view.animation.Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(android.view.animation.Animation animation) {
+                }
 
-            @Override
-            public void onAnimationEnd(android.view.animation.Animation animation) {
-                blurView.setVisibility(View.GONE);
-            }
+                @Override
+                public void onAnimationEnd(android.view.animation.Animation animation) {
+                    blurView.setVisibility(View.GONE);
+                }
 
-            @Override
-            public void onAnimationRepeat(android.view.animation.Animation animation) {
-            }
-        });
-        blurView.startAnimation(animation);
+                @Override
+                public void onAnimationRepeat(android.view.animation.Animation animation) {
+                }
+            });
+            blurView.startAnimation(animation);
+        }
     }
 
     private void showErrorDialog(String title, String message) {
@@ -112,23 +139,30 @@ public class RsaEncryptionActivity extends AppCompatActivity {
     private void showLoadingDialog() {
         showBlurView();
 
-        Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.custom_error_dialog);
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        dialog.setCancelable(false);
+        loadingDialog = new Dialog(this);
+        loadingDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        loadingDialog.setContentView(R.layout.custom_error_dialog);
+        loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        loadingDialog.setCancelable(false);
 
-        ImageView icon = dialog.findViewById(R.id.dialogIcon);
-        TextView titleText = dialog.findViewById(R.id.dialogTitle);
-        TextView messageText = dialog.findViewById(R.id.dialogMessage);
-        Button btnOk = dialog.findViewById(R.id.btnOk);
+        ImageView icon = loadingDialog.findViewById(R.id.dialogIcon);
+        TextView titleText = loadingDialog.findViewById(R.id.dialogTitle);
+        TextView messageText = loadingDialog.findViewById(R.id.dialogMessage);
+        Button btnOk = loadingDialog.findViewById(R.id.btnOk);
 
         icon.setImageResource(R.drawable.rsa_encrypt);
         titleText.setVisibility(View.GONE);
         messageText.setText("Encrypting with RSA...");
         btnOk.setVisibility(View.GONE);
 
-        dialog.show();
+        loadingDialog.show();
+    }
+
+    private void hideLoadingDialog() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+            hideBlurView();
+        }
     }
 
     private void showSuccessDialog() {
@@ -152,5 +186,11 @@ public class RsaEncryptionActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        hideLoadingDialog();
     }
 }

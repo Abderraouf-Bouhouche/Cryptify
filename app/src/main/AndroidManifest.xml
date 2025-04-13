@@ -58,6 +58,10 @@
         <activity
             android:name=".RsaEncryptionActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".RsaChoiceActivity"
+            android:exported="false" />
             
     </application>
 
