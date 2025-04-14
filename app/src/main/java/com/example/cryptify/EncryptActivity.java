@@ -1,9 +1,15 @@
 package com.example.cryptify;
 
 import android.app.Dialog;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
@@ -14,7 +20,17 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.Manifest;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.cryptify.Steganography.StegnoAPI;
+
+import java.io.File;
+import java.io.OutputStream;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 public class EncryptActivity extends AppCompatActivity {
@@ -30,6 +46,7 @@ public class EncryptActivity extends AppCompatActivity {
     private Button encryptButton;
     private View blurView;
     private Uri selectedImageUri;
+    ImageView imageShow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +82,7 @@ public class EncryptActivity extends AppCompatActivity {
 
     private void clearSelectedImage() {
         selectedImageUri = null;
-        selectedImage.setImageResource(R.drawable.image);
+        imageShow.setImageURI(null);
         clearImageButton.setVisibility(View.GONE);
     }
 
@@ -76,7 +93,8 @@ public class EncryptActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             selectedImageUri = data.getData();
             if (selectedImageUri != null) {
-                selectedImage.setImageURI(selectedImageUri);
+                imageShow =findViewById(R.id.imageShow);
+                imageShow.setImageURI(selectedImageUri);
                 clearImageButton.setVisibility(View.VISIBLE);
                 // Vérifier le format de l'image
                 String mimeType = getContentResolver().getType(selectedImageUri);
@@ -98,10 +116,6 @@ public class EncryptActivity extends AppCompatActivity {
             return;
         }
 
-        if (!isValidKey(key1) || !isValidKey(key2)) {
-            showErrorDialog("invalid key", "key must be 16 characters");
-            return;
-        }
 
         if (message.isEmpty()) {
             showErrorDialog("incomplete", "please write a message");
@@ -110,6 +124,33 @@ public class EncryptActivity extends AppCompatActivity {
 
         showLoadingDialog();
         // TODO: Implémenter la logique d'encryption
+        checkPermission();
+        StegnoAPI steg=new StegnoAPI();
+        File imageFile=new File(String.valueOf(selectedImageUri));
+        byte[] imageBytes=null;
+        // WARNING: Only use this on background threads!
+        Future<byte[]> future = Executors.newSingleThreadExecutor().submit(() -> {
+            return steg.encrypt(key1, key2, imageFile, message);
+        });
+
+        try {
+            imageBytes = future.get(); // Blocks until result is available
+            if(imageBytes!=null) {
+                Uri savedUri = saveByteArrayToGallery(this, imageBytes, "MyImage_" + System.currentTimeMillis() + ".png");
+                if (savedUri != null) {
+                    Toast.makeText(this, "Image saved to Gallery!", Toast.LENGTH_SHORT).show();
+                }
+            }else{
+                Toast.makeText(this,"image not saved", Toast.LENGTH_SHORT).show();
+            }
+
+            // Use imageBytes here
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
         // Simuler un délai pour le chargement
         new android.os.Handler().postDelayed(() -> {
             showSuccessDialog();
@@ -215,5 +256,56 @@ public class EncryptActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    public Uri saveByteArrayToGallery(Context context, byte[] byteArray, String fileName) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+        contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+
+        // For Android 10+ (API 29+), specify the directory
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+        }
+
+        Uri uri = null;
+        OutputStream outputStream = null;
+
+        try {
+            uri = context.getContentResolver().insert(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    contentValues
+            );
+
+            if (uri != null) {
+                outputStream = context.getContentResolver().openOutputStream(uri);
+                if (outputStream != null) {
+                    outputStream.write(byteArray);
+                    return uri;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+    public void checkPermission(){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        101
+                );
+            }
+        }
     }
 }

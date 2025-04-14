@@ -7,6 +7,8 @@ import android.database.sqlite.*;
 
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "namebrk.db";
     private static final String TABLE_USERS = "users";
@@ -14,6 +16,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_PASSWORD = "password";
     private static final String COLUMN_PUBLICKEY = "publickey";
     private static final String COLUMN_PRIVATEKEY = "privatekey";
+
+    private static final String TABLE_IMAGES = "images";
+    private static final String COLUMN_IMAGE_ID = "id";
+    private static final String COLUMN_IMAGE_USER = "username";
+    private static final String COLUMN_IMAGE_PATH = "path";
+    private static final String COLUMN_IMAGE_DATE = "date_added";
+    private static final String COLUMN_IMAGE_KEY = "kkey";
+    private static final String COLUMN_IMAGE_IV = "iv";
 
     public DatabaseHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -25,6 +35,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             COLUMN_PASSWORD + " TEXT, " + 
             COLUMN_PUBLICKEY + " TEXT, " + 
             COLUMN_PRIVATEKEY + " TEXT)");
+
+
+        MyDatabase.execSQL("CREATE TABLE " + TABLE_IMAGES + " (" +
+                COLUMN_IMAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_IMAGE_USER + " TEXT, " +
+                COLUMN_IMAGE_PATH + " TEXT, " +
+                COLUMN_IMAGE_DATE + " TEXT, " +
+                COLUMN_IMAGE_KEY + " TEXT, " +
+                COLUMN_IMAGE_IV + " TEXT, " +
+                "FOREIGN KEY(" + COLUMN_IMAGE_USER + ") REFERENCES " +
+                TABLE_USERS + "(" + COLUMN_USERNAME + "))");
+
     }
 
     public void onUpgrade(SQLiteDatabase MyDB, int oldVersion, int newVersion) {
@@ -38,6 +60,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             MyDB.execSQL("INSERT INTO " + TABLE_USERS + "_new SELECT * FROM " + TABLE_USERS);
             MyDB.execSQL("DROP TABLE " + TABLE_USERS);
             MyDB.execSQL("ALTER TABLE " + TABLE_USERS + "_new RENAME TO " + TABLE_USERS);
+
+
+            // Upgrade images table (new)
+            MyDB.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_IMAGES + "_new (" +
+                    COLUMN_IMAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_IMAGE_USER + " TEXT, " +
+                    COLUMN_IMAGE_PATH + " TEXT, " +
+                    COLUMN_IMAGE_DATE + " INTEGER, " +
+                    COLUMN_IMAGE_KEY + " TEXT, " +
+                    COLUMN_IMAGE_IV + " TEXT, " +
+                    "FOREIGN KEY(" + COLUMN_IMAGE_USER + ") REFERENCES " +
+                    TABLE_USERS + "(" + COLUMN_USERNAME + "))");
+
+            MyDB.execSQL("INSERT INTO " + TABLE_IMAGES + "_new SELECT * FROM " + TABLE_IMAGES);
+            MyDB.execSQL("DROP TABLE " + TABLE_IMAGES);
+            MyDB.execSQL("ALTER TABLE " + TABLE_IMAGES + "_new RENAME TO " + TABLE_IMAGES);
         }
     }
 
@@ -135,4 +173,55 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return privateKey;
     }
+
+
+
+    public boolean insertImage(String username, String path ,
+                               String key, String iv) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_IMAGE_USER, username);
+        values.put(COLUMN_IMAGE_PATH, path);
+        values.put(COLUMN_IMAGE_DATE, System.currentTimeMillis());
+        values.put(COLUMN_IMAGE_KEY, key);
+        values.put(COLUMN_IMAGE_IV, iv);
+
+        long result = db.insert(TABLE_IMAGES, null, values);
+        return result != -1;
+    }
+
+
+
+
+    public ArrayList<ImageStructure> getImagesByUsername(String username) {
+        ArrayList<ImageStructure> imageList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_IMAGES +
+                        " WHERE " + COLUMN_IMAGE_USER + " = ?" +
+                        " ORDER BY " + COLUMN_IMAGE_DATE + " DESC",
+                new String[]{username});
+
+        if (cursor != null) {
+            try {
+                while (cursor.moveToNext()) {
+                    ImageStructure image = new ImageStructure(
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_ID)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_PATH)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_KEY)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_IV)),
+                            cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_DATE))
+                            // cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_TITLE))
+                    );
+                    imageList.add(image);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        db.close();
+        return imageList;
+    }
+
 }

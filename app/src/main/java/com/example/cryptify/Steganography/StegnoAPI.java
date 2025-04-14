@@ -18,11 +18,7 @@ public class StegnoAPI {
                 .build();
         //sending the request and handling the response
         try(Response response=client.newCall(request).execute()){
-            if(response.isSuccessful()){
-                System.out.println("server active");
-            }else{
-                System.out.println("server down");
-            }
+
 
         } catch (Exception e) {
             throw new RuntimeException(e);

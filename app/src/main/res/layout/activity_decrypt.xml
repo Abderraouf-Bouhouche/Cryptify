@@ -23,6 +23,7 @@
         android:layout_height="100dp"
         android:layout_below="@id/backButton"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="-10dp"
         android:src="@drawable/logo_1" />
 
     <!-- Text to Decrypt Input -->
@@ -33,10 +34,10 @@
     <LinearLayout
         android:id="@+id/imageSelectionContainer"
         android:layout_width="187dp"
-        android:layout_height="113dp"
+        android:layout_height="160dp"
         android:layout_below="@id/logo"
-        android:layout_marginTop="26dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="14dp"
         android:background="@drawable/rounded_button_background"
         android:gravity="center"
         android:orientation="vertical"
@@ -83,13 +84,15 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/imageSelectionContainer"
         android:layout_marginTop="12dp"
-        android:background="@drawable/input_background"
+        android:background="@drawable/purple_input_background"
+        android:fontFamily="@font/robocode"
         android:gravity="top"
-        android:hint="Encrypted text will appear here"
+        android:hint="encrypted text will appear here"
         android:maxLines="6"
         android:minLines="3"
         android:padding="12dp"
-        android:textColor="@color/black"
+        android:textColor="@color/white"
+        android:textColorHint="#45FFFFFF"
         android:textSize="14sp" />
 
     <!-- Key 2 Input -->
@@ -114,11 +117,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="@drawable/input_background"
-            android:hint="16 characters for max security"
+            android:background="@drawable/edit_text_background"
+            android:fontFamily="@font/robocode"
+            android:hint="16 characters or you can leave it blank"
             android:inputType="textPassword"
             android:padding="12dp"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
+            android:textColorHint="#45000000"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -143,11 +148,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="@drawable/input_background"
-            android:hint="16 characters for max security"
+            android:background="@drawable/edit_text_background"
+            android:fontFamily="@font/robocode"
+            android:hint="16 characters or you can leave it blank"
             android:inputType="textPassword"
             android:padding="12dp"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
+            android:textColorHint="#45000000"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -160,7 +167,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/copyright"
-        android:layout_marginBottom="69dp"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/button_background"
         android:fontFamily="@font/robocode"
         android:padding="16dp"
