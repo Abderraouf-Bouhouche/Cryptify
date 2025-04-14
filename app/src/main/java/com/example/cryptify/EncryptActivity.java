@@ -29,6 +29,7 @@ import com.example.cryptify.Steganography.StegnoAPI;
 
 import java.io.File;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
@@ -129,13 +130,11 @@ public class EncryptActivity extends AppCompatActivity {
         File imageFile=new File(String.valueOf(selectedImageUri));
         byte[] imageBytes=null;
         // WARNING: Only use this on background threads!
-        Future<byte[]> future = Executors.newSingleThreadExecutor().submit(() -> {
-            return steg.encrypt(key1, key2, imageFile, message);
-        });
 
-        try {
-            imageBytes = future.get(); // Blocks until result is available
+            imageBytes =steg.encrypt(key1, key2, imageFile, message);
             if(imageBytes!=null) {
+
+                Toast.makeText(this, "its working", Toast.LENGTH_SHORT).show();
                 Uri savedUri = saveByteArrayToGallery(this, imageBytes, "MyImage_" + System.currentTimeMillis() + ".png");
                 if (savedUri != null) {
                     Toast.makeText(this, "Image saved to Gallery!", Toast.LENGTH_SHORT).show();
@@ -144,17 +143,16 @@ public class EncryptActivity extends AppCompatActivity {
                 Toast.makeText(this,"image not saved", Toast.LENGTH_SHORT).show();
             }
 
-            // Use imageBytes here
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
 
 
+/*
         // Simuler un délai pour le chargement
         new android.os.Handler().postDelayed(() -> {
             showSuccessDialog();
         }, 2000);
+
+ */
     }
 
     private boolean isValidKey(String key) {
