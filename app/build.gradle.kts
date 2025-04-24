@@ -47,4 +47,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.12.1")
     implementation ("com.squareup.okhttp3:okhttp:4.12.0")
     implementation ("com.github.Dimezis:BlurView:version-2.0.6")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.1")
 }

@@ -5,11 +5,13 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
@@ -20,18 +22,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.Manifest;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.cryptify.Steganography.StegnoAPI;
+import com.example.cryptify.Steganography.ApiClient;
 
 import java.io.File;
 import java.io.OutputStream;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 public class EncryptActivity extends AppCompatActivity {
@@ -48,6 +46,7 @@ public class EncryptActivity extends AppCompatActivity {
     private View blurView;
     private Uri selectedImageUri;
     ImageView imageShow;
+    private Handler handler=new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,16 +122,61 @@ public class EncryptActivity extends AppCompatActivity {
             return;
         }
 
-        showLoadingDialog();
         // TODO: Implémenter la logique d'encryption
         checkPermission();
-        StegnoAPI steg=new StegnoAPI();
-        File imageFile=new File(String.valueOf(selectedImageUri));
-        byte[] imageBytes=null;
-        // WARNING: Only use this on background threads!
+        File image=new File(getRealPathFromUri(selectedImageUri));
+        if(key1.isEmpty()){
+            ApiClient.generate_key(new ApiClient.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    key1Input.setText(result);
 
-            imageBytes =steg.encrypt(key1, key2, imageFile, message);
-            if(imageBytes!=null) {
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    showErrorDialog("nigga","nigga");
+                }
+            });
+        }
+        if(key2.isEmpty()){
+            ApiClient.generate_iv(new ApiClient.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    key2Input.setText(result);
+
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    runOnUiThread(()->
+                            showErrorDialog("nigga","nigga")
+                            );
+                }
+            });
+        }
+
+ ApiClient.encrypt(key1, key2, image, message, new ApiClient.ApiCallback<byte[]>() {
+     @Override
+     public void onSuccess(byte[] result) {
+         runOnUiThread(()->
+                 showSuccessDialog()
+                 );
+     }
+
+     @Override
+     public void onFailure(String error) {
+         runOnUiThread(()->
+                 showErrorDialog("nigga1","nigga2")
+                 );
+     }
+ });
+
+
+
+
+        /*
+           if(imageBytes!=null) {
 
                 Toast.makeText(this, "its working", Toast.LENGTH_SHORT).show();
                 Uri savedUri = saveByteArrayToGallery(this, imageBytes, "MyImage_" + System.currentTimeMillis() + ".png");
@@ -142,7 +186,7 @@ public class EncryptActivity extends AppCompatActivity {
             }else{
                 Toast.makeText(this,"image not saved", Toast.LENGTH_SHORT).show();
             }
-
+*/
 
 
 
@@ -306,4 +350,58 @@ public class EncryptActivity extends AppCompatActivity {
             }
         }
     }
+
+    private File getFileFromUri(Uri uri) {
+        String filePath;
+        if (DocumentsContract.isDocumentUri(this, uri)) {
+            // Handle document URI
+            String docId = DocumentsContract.getDocumentId(uri);
+            String[] split = docId.split(":");
+            String type = split[0];
+
+            if ("primary".equalsIgnoreCase(type)) {
+                filePath = Environment.getExternalStorageDirectory() + "/" + split[1];
+                return new File(filePath);
+            }
+
+            // Handle non-primary storage
+            Cursor cursor = getContentResolver().query(
+                    uri,
+                    new String[]{MediaStore.Images.Media.DATA},
+                    null, null, null
+            );
+
+            if (cursor != null && cursor.moveToFirst()) {
+                filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+                cursor.close();
+                return new File(filePath);
+            }
+        } else if ("content".equalsIgnoreCase(uri.getScheme())) {
+            // Handle content URI
+            Cursor cursor = getContentResolver().query(uri,
+                    new String[]{MediaStore.Images.Media.DATA}, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+                cursor.close();
+                return new File(filePath);
+            }
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            // Handle file URI
+            return new File(uri.getPath());
+        }
+
+        return null;
+    }
+    private String getRealPathFromUri(Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        if (cursor == null) return null;
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String path = cursor.getString(column_index);
+        cursor.close();
+        return path;
+    }
+
 }
