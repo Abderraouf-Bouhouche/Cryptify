@@ -39,7 +39,6 @@ public class DecryptActivity extends AppCompatActivity {
 
     private ImageButton backButton;
     private LinearLayout imageSelectionContainer;
-    private ImageView selectedImage;
     private ImageButton clearImageButton;
     private EditText key1Input, key2Input;
     private Button decryptButton;
@@ -63,7 +62,6 @@ public class DecryptActivity extends AppCompatActivity {
     private void initializeViews() {
         backButton = findViewById(R.id.backButton);
         imageSelectionContainer = findViewById(R.id.imageSelectionContainer);
-        selectedImage = findViewById(R.id.selectedImage);
         clearImageButton = findViewById(R.id.clearImageButton);
         key1Input = findViewById(R.id.key1Input);
         key2Input = findViewById(R.id.key2Input);
@@ -78,6 +76,11 @@ public class DecryptActivity extends AppCompatActivity {
         imageSelectionContainer.setOnClickListener(v -> openImagePicker());
         clearImageButton.setOnClickListener(v -> clearSelectedImage());
         decryptButton.setOnClickListener(v -> handleDecryption());
+        folderButton.setOnClickListener(v->{
+            Intent intent=new Intent(DecryptActivity.this,DecryptListActivity.class);
+            intent.putExtra("username",getIntent().getStringExtra("username"));
+            startActivity(intent);
+        });
     }
 
     private void openImagePicker() {

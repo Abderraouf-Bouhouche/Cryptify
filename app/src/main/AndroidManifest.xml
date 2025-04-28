@@ -80,6 +80,9 @@
             android:exported="false"/>
         <activity android:name=".EncryptActivityResult"
             android:exported="false"/>
+        <activity android:name=".DecryptListActivity"
+            android:exported="false"/>
+
 
 
     </application>

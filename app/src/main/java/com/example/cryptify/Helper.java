@@ -34,7 +34,7 @@ public class Helper {
 
 
 
-    public static void saveBitmapToMediaGallery(Context context, Bitmap bitmap) {
+    public static String saveBitmapToMediaGallery(Context context, Bitmap bitmap) {
         // Set up metadata for the new image
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "image"+System.currentTimeMillis()+".png");
@@ -57,6 +57,15 @@ public class Helper {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        File directory = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES); // Or use getExternalFilesDir()
+        File file = new File(directory, "MY_image"+System.currentTimeMillis());
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos); // Or use JPEG
+            return file.getAbsolutePath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null; // Or handle the error appropriately
         }
     }
 

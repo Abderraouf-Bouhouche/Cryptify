@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "namebrk.db";
+    private static final String DATABASE_NAME = "cryptify.db";
     private static final String TABLE_USERS = "users";
     private static final String COLUMN_USERNAME = "username";
     private static final String COLUMN_PASSWORD = "password";
@@ -20,7 +20,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_IMAGES = "images";
     private static final String COLUMN_IMAGE_ID = "id";
     private static final String COLUMN_IMAGE_USER = "username";
-    private static final String COLUMN_IMAGE_PATH = "path";
+    private static final String COLUMN_IMAGE_IMAGE= "image";
     private static final String COLUMN_IMAGE_DATE = "date_added";
     private static final String COLUMN_IMAGE_KEY = "kkey";
     private static final String COLUMN_IMAGE_IV = "iv";
@@ -40,8 +40,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         MyDatabase.execSQL("CREATE TABLE " + TABLE_IMAGES + " (" +
                 COLUMN_IMAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_IMAGE_USER + " TEXT, " +
-                COLUMN_IMAGE_PATH + " TEXT, " +
-                COLUMN_IMAGE_DATE + " TEXT, " +
+                COLUMN_IMAGE_IMAGE+ " TEXT, " +
+                COLUMN_IMAGE_DATE + " LONG, " +
                 COLUMN_IMAGE_KEY + " TEXT, " +
                 COLUMN_IMAGE_IV + " TEXT, " +
                 "FOREIGN KEY(" + COLUMN_IMAGE_USER + ") REFERENCES " +
@@ -66,8 +66,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             MyDB.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_IMAGES + "_new (" +
                     COLUMN_IMAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     COLUMN_IMAGE_USER + " TEXT, " +
-                    COLUMN_IMAGE_PATH + " TEXT, " +
-                    COLUMN_IMAGE_DATE + " INTEGER, " +
+                    COLUMN_IMAGE_IMAGE+ " TEXT, " +
+                    COLUMN_IMAGE_DATE + " LONG, " +
                     COLUMN_IMAGE_KEY + " TEXT, " +
                     COLUMN_IMAGE_IV + " TEXT, " +
                     "FOREIGN KEY(" + COLUMN_IMAGE_USER + ") REFERENCES " +
@@ -176,12 +176,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
 
-    public boolean insertImage(String username, String path ,
+    public boolean insertImage(String username, String path,
                                String key, String iv) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_IMAGE_USER, username);
-        values.put(COLUMN_IMAGE_PATH, path);
+        values.put(COLUMN_IMAGE_IMAGE, path);
         values.put(COLUMN_IMAGE_DATE, System.currentTimeMillis());
         values.put(COLUMN_IMAGE_KEY, key);
         values.put(COLUMN_IMAGE_IV, iv);
@@ -206,8 +206,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             try {
                 while (cursor.moveToNext()) {
                     ImageStructure image = new ImageStructure(
-                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_ID)),
-                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_PATH)),
+                            cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_ID)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_IMAGE)),
                             cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_KEY)),
                             cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_IV)),
                             cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_DATE))

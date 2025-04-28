@@ -1,5 +1,6 @@
 package com.example.cryptify;
 
+import static android.provider.MediaStore.Images.Media.insertImage;
 import static com.example.cryptify.Helper.saveBitmapToMediaGallery;
 import static com.example.cryptify.Helper.uriToFile;
 import static com.example.cryptify.Steganography.AESCTR.generateIv;
@@ -34,6 +35,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.cryptify.Steganography.LSBSteganography;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -57,6 +59,7 @@ public class EncryptActivity extends AppCompatActivity {
     private Uri selectedImageUri;
     ImageView imageShow;
     Dialog loadingDialog;
+    DatabaseHelper db;
 //made by gemini
     private ExecutorService executorService;
     private Handler mainHandler;
@@ -65,6 +68,7 @@ public class EncryptActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_encrypt);
+        db=new DatabaseHelper(this);
         initializeViews();
         setupClickListeners();
     }
@@ -158,7 +162,14 @@ public class EncryptActivity extends AppCompatActivity {
             }
             Bitmap bitImage= BitmapFactory.decodeFile(image.getAbsolutePath());
             Bitmap secretImage=LSBSteganography.hideMessage(bitImage,message,key1,key2);
-            saveBitmapToMediaGallery(this,secretImage);
+            String imagePath=saveBitmapToMediaGallery(this,secretImage);
+
+            if(!db.insertImage(getIntent().getStringExtra("username"),imagePath,key1,key2)) {
+                mainHandler.post(()->
+                showErrorDialog("error","cant register the image in the db")
+                );
+            }
+
             mainHandler.post(()->{
                 hideLoadingDialog();
                 Intent intent = new Intent(EncryptActivity.this, EncryptActivityResult.class);
