@@ -82,7 +82,8 @@
             android:exported="false"/>
         <activity android:name=".DecryptListActivity"
             android:exported="false"/>
-
+        <activity android:name=".DecryptKnownActivity"
+            android:exported="false"/>
 
 
     </application>

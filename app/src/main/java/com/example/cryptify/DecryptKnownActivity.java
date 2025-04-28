@@ -23,7 +23,6 @@ public class DecryptKnownActivity extends AppCompatActivity {
         setContentView(R.layout.activity_decrypt_known);
         initializeViews();
         setupClickListeners();
-        handleDecryption();
     }
     private void initializeViews(){
 
