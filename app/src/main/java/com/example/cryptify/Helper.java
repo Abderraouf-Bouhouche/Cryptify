@@ -35,7 +35,6 @@ public class Helper {
 
 
     public static String saveBitmapToMediaGallery(Context context, Bitmap bitmap) {
-        /*
         // Set up metadata for the new image
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "image"+System.currentTimeMillis()+".png");
@@ -54,28 +53,11 @@ public class Helper {
             if (outputStream != null) {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
                 outputStream.close();
-
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        */
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "image"+System.currentTimeMillis()+".png");
-        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/png");
-
-        // Save to the Pictures directory (standard gallery location)
-        contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
-        File directory = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES); // Or use getExternalFilesDir()
-        File file = new File(directory, "MY_image"+System.currentTimeMillis());
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos); // Or use JPEG
-            fos.close();
-            return file.getAbsolutePath();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null; // Or handle the error appropriately
-        }
+        return imageUri.toString();
     }
 
     public static File uriToFile(Context context, Uri uri) throws IOException {

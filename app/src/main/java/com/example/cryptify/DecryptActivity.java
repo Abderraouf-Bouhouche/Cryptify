@@ -27,6 +27,8 @@ import com.example.cryptify.Steganography.LSBSteganography;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -50,7 +52,7 @@ public class DecryptActivity extends AppCompatActivity {
 
     private ExecutorService executorService;
     private Handler mainHandler;
-
+    private String key1,key2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +121,8 @@ public class DecryptActivity extends AppCompatActivity {
         String key1 = key1Input.getText().toString().trim();
         String key2 = key2Input.getText().toString().trim();
 
+
+
         if(selectedImageUri==null){
            showErrorDialog("incomplete","please choose a picture");
         }
@@ -134,13 +138,18 @@ public class DecryptActivity extends AppCompatActivity {
             // Optionally, you might want to stop further execution here
             return;
         }
+        key1= Base64.getEncoder().encodeToString(key1.getBytes(StandardCharsets.UTF_8));
+        key2= Base64.getEncoder().encodeToString(key2.getBytes(StandardCharsets.UTF_8));
+
         showLoadingDialog();
 
+        final String key1Final=key1;
+        final String key2Final=key2;
         executorService= Executors.newSingleThreadExecutor();
         mainHandler= new Handler(Looper.getMainLooper());
         executorService.submit(()->{
             Bitmap bitImage= BitmapFactory.decodeFile(image.getAbsolutePath());
-            String decryptedMessage=LSBSteganography.extractMessage(bitImage,key1,key2);
+            String decryptedMessage=LSBSteganography.extractMessage(bitImage,key1Final,key2Final);
             mainHandler.post(()->{
                 hideLoadingDialog();
                 Intent intent=new Intent(DecryptActivity.this, DecryptActivityResult.class);
@@ -207,28 +216,6 @@ public class DecryptActivity extends AppCompatActivity {
         dialog.show();
     }
 
-
-    private void showSuccessDialog(String decryptedText) {
-        Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.custom_error_dialog);
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-
-        ImageView icon = dialog.findViewById(R.id.dialogIcon);
-        TextView titleText = dialog.findViewById(R.id.dialogTitle);
-        TextView messageText = dialog.findViewById(R.id.dialogMessage);
-        Button btnOk = dialog.findViewById(R.id.btnOk);
-
-        icon.setImageResource(R.drawable.decrypt);
-        titleText.setText("Decrypted text");
-        messageText.setText(decryptedText);
-        btnOk.setOnClickListener(v -> {
-            dialog.dismiss();
-            hideBlurView();
-        });
-
-        dialog.show();
-    }
 
 
     private void showLoadingDialog() {

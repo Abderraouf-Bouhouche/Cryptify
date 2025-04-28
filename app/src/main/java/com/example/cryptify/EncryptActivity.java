@@ -39,6 +39,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -50,7 +52,6 @@ public class EncryptActivity extends AppCompatActivity {
 
     private ImageButton backButton;
     private LinearLayout imageSelectionContainer;
-    private ImageView selectedImage;
     private ImageButton clearImageButton;
     private EditText key1Input, key2Input, messageInput;
     private String key1,key2;
@@ -76,7 +77,6 @@ public class EncryptActivity extends AppCompatActivity {
     private void initializeViews() {
         backButton = findViewById(R.id.backButton);
         imageSelectionContainer = findViewById(R.id.imageSelectionContainer);
-        selectedImage = findViewById(R.id.selectedImage);
         clearImageButton = findViewById(R.id.clearImageButton);
         key1Input = findViewById(R.id.key1Input);
         key2Input = findViewById(R.id.key2Input);
@@ -124,8 +124,8 @@ public class EncryptActivity extends AppCompatActivity {
     }
 
     private void handleEncryption()  {
-        key1 = key1Input.getText().toString().trim();
-        key2 = key2Input.getText().toString().trim();
+        String key1Inputed = key1Input.getText().toString().trim();
+        String key2Inputed = key2Input.getText().toString().trim();
         String message = messageInput.getText().toString();
 
         if (selectedImageUri == null) {
@@ -154,27 +154,53 @@ public class EncryptActivity extends AppCompatActivity {
         executorService=Executors.newSingleThreadExecutor();
         mainHandler= new Handler(Looper.getMainLooper());
         executorService.submit(()->{
-            if(key1.isEmpty()){
+            if(key1Inputed.isEmpty()){
                 key1=generateKey();
+            }else{
+                key1= Base64.getEncoder().encodeToString(key1Inputed.getBytes(StandardCharsets.UTF_8));
             }
-            if(key2.isEmpty()){
+            if(key2Inputed.isEmpty()){
                 key2=generateIv();
+            }else{
+                key2=Base64.getEncoder().encodeToString(key2Inputed.getBytes(StandardCharsets.UTF_8));
             }
             Bitmap bitImage= BitmapFactory.decodeFile(image.getAbsolutePath());
             Bitmap secretImage=LSBSteganography.hideMessage(bitImage,message,key1,key2);
-            String imagePath=saveBitmapToMediaGallery(this,secretImage);
+            try {
+                String imagePath = saveBitmapToMediaGallery(this, secretImage);
+                if(!db.insertImage(getIntent().getStringExtra("username"),imagePath,key1,key2)) {
+                    mainHandler.post(()->
+                            showErrorDialog("error","cant register the image in the db")
+                    );
+                }
+            }catch(Exception e){
+                mainHandler.post(()-> {
+                    hideLoadingDialog();
+                    showErrorDialog("error", e.getMessage());
+                });
 
-            if(!db.insertImage(getIntent().getStringExtra("username"),imagePath,key1,key2)) {
-                mainHandler.post(()->
-                showErrorDialog("error","cant register the image in the db")
-                );
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
+
 
             mainHandler.post(()->{
                 hideLoadingDialog();
                 Intent intent = new Intent(EncryptActivity.this, EncryptActivityResult.class);
-                intent.putExtra("key1",key1);
-                intent.putExtra("key2",key2);
+                if(key1Inputed.isEmpty()) {
+                    intent.putExtra("key1", key1);
+                }else{
+                    intent.putExtra("key1",key1Inputed);
+                }
+                if(key2Inputed.isEmpty()){
+                    intent.putExtra("key2",key2);
+                }else{
+                    intent.putExtra("key2",key2Inputed);
+                }
+
                 intent.putExtra("Uri",selectedImageUri.toString());
                 intent.putExtra("username",getIntent().getStringExtra("username"));
                 startActivity(intent);

@@ -92,8 +92,19 @@ public class DecryptListActivity extends AppCompatActivity {
         dateTextView.setText("Date: " + formatDate(imageData.date_added));
 
         // Load the image from the byte array.
-        Bitmap bitmap=BitmapFactory.decodeFile(imageData.image);
-        imageView.setImageBitmap(bitmap);
+        try {
+            ContentResolver resolver = context.getContentResolver();
+            Uri imageUri = Uri.parse(imageData.image);
+            InputStream inputStream = resolver.openInputStream(imageUri);
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            imageView.setImageBitmap(bitmap);
+            if (inputStream != null) {
+                inputStream.close();
+            }
+        } catch (IOException e) {
+            showErrorDialog("error",e.getMessage());
+            imageView.setImageResource(R.drawable.image); // Replace with your error drawable
+        }
         imageView.setOnClickListener(v-> {
             Intent intent = new Intent(DecryptListActivity.this, DecryptKnownActivity.class);
             intent.putExtra("key1", imageData.key);

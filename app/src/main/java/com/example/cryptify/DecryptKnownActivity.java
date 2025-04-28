@@ -1,16 +1,23 @@
 package com.example.cryptify;
 
+import static android.widget.Toast.LENGTH_LONG;
+
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.cryptify.Steganography.LSBSteganography;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -23,6 +30,7 @@ public class DecryptKnownActivity extends AppCompatActivity {
         setContentView(R.layout.activity_decrypt_known);
         initializeViews();
         setupClickListeners();
+        handleDecryption();
     }
     private void initializeViews(){
 
@@ -35,17 +43,28 @@ public class DecryptKnownActivity extends AppCompatActivity {
         executorService= Executors.newSingleThreadExecutor();
         mainHandler= new Handler(Looper.getMainLooper());
         executorService.submit(()->{
-            String key=getIntent().getStringExtra("key");
-            String iv=getIntent().getStringExtra("iv");
+            String key=getIntent().getStringExtra("key1");
+            String iv=getIntent().getStringExtra("key2");
             String path=getIntent().getStringExtra("path");
-            Bitmap image= BitmapFactory.decodeFile(path);
-            String decryptedMessage= LSBSteganography.extractMessage(image,key,iv);
-            mainHandler.post(()->{
-                Intent intent=new Intent(DecryptKnownActivity.this, DecryptActivityResult.class);
-                intent.putExtra("message",decryptedMessage);
-                startActivity(intent);
-                finish();
-            });
+            try {
+                ContentResolver resolver = this.getContentResolver();
+                Uri imageUri = Uri.parse(path);
+                InputStream inputStream = resolver.openInputStream(imageUri);
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                String decryptedMessage= LSBSteganography.extractMessage(bitmap,key,iv);
+                mainHandler.post(()->{
+                    Intent intent=new Intent(DecryptKnownActivity.this, DecryptActivityResult.class);
+                    intent.putExtra("message",decryptedMessage);
+                    startActivity(intent);
+                    finish();
+                });
+            } catch (IOException e) {
+                Toast.makeText(this,"problem",LENGTH_LONG);
+            }
+
         });
     }
 }
