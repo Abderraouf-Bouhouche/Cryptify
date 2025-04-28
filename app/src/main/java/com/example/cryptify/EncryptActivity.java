@@ -1,17 +1,23 @@
 package com.example.cryptify;
 
+import static com.example.cryptify.Helper.saveBitmapToMediaGallery;
+import static com.example.cryptify.Helper.uriToFile;
+import static com.example.cryptify.Steganography.AESCTR.generateIv;
+import static com.example.cryptify.Steganography.AESCTR.generateKey;
+
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.DocumentsContract;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
@@ -26,10 +32,13 @@ import android.Manifest;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.cryptify.Steganography.ApiClient;
+import com.example.cryptify.Steganography.LSBSteganography;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 public class EncryptActivity extends AppCompatActivity {
@@ -42,11 +51,15 @@ public class EncryptActivity extends AppCompatActivity {
     private ImageView selectedImage;
     private ImageButton clearImageButton;
     private EditText key1Input, key2Input, messageInput;
+    private String key1,key2;
     private Button encryptButton;
     private View blurView;
     private Uri selectedImageUri;
     ImageView imageShow;
-    private Handler handler=new Handler();
+    Dialog loadingDialog;
+//made by gemini
+    private ExecutorService executorService;
+    private Handler mainHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,9 +119,9 @@ public class EncryptActivity extends AppCompatActivity {
         }
     }
 
-    private void handleEncryption() {
-        String key1 = key1Input.getText().toString();
-        String key2 = key2Input.getText().toString();
+    private void handleEncryption()  {
+        key1 = key1Input.getText().toString().trim();
+        key2 = key2Input.getText().toString().trim();
         String message = messageInput.getText().toString();
 
         if (selectedImageUri == null) {
@@ -124,79 +137,39 @@ public class EncryptActivity extends AppCompatActivity {
 
         // TODO: Implémenter la logique d'encryption
         checkPermission();
-        File image=new File(getRealPathFromUri(selectedImageUri));
-        if(key1.isEmpty()){
-            ApiClient.generate_key(new ApiClient.ApiCallback<String>() {
-                @Override
-                public void onSuccess(String result) {
-                    key1Input.setText(result);
 
-                }
-
-                @Override
-                public void onFailure(String error) {
-                    showErrorDialog("nigga","nigga");
-                }
-            });
+        File image;
+        try {
+            image = uriToFile(this, selectedImageUri);
+        } catch (IOException e) {
+            showErrorDialog("Error", "Error converting URI to file: " + e.getMessage());
+            // Optionally, you might want to stop further execution here
+            return;
         }
-        if(key2.isEmpty()){
-            ApiClient.generate_iv(new ApiClient.ApiCallback<String>() {
-                @Override
-                public void onSuccess(String result) {
-                    key2Input.setText(result);
-
-                }
-
-                @Override
-                public void onFailure(String error) {
-                    runOnUiThread(()->
-                            showErrorDialog("nigga","nigga")
-                            );
-                }
-            });
-        }
-
- ApiClient.encrypt(key1, key2, image, message, new ApiClient.ApiCallback<byte[]>() {
-     @Override
-     public void onSuccess(byte[] result) {
-         runOnUiThread(()->
-                 showSuccessDialog()
-                 );
-     }
-
-     @Override
-     public void onFailure(String error) {
-         runOnUiThread(()->
-                 showErrorDialog("nigga1","nigga2")
-                 );
-     }
- });
-
-
-
-
-        /*
-           if(imageBytes!=null) {
-
-                Toast.makeText(this, "its working", Toast.LENGTH_SHORT).show();
-                Uri savedUri = saveByteArrayToGallery(this, imageBytes, "MyImage_" + System.currentTimeMillis() + ".png");
-                if (savedUri != null) {
-                    Toast.makeText(this, "Image saved to Gallery!", Toast.LENGTH_SHORT).show();
-                }
-            }else{
-                Toast.makeText(this,"image not saved", Toast.LENGTH_SHORT).show();
+        showLoadingDialog();
+        executorService=Executors.newSingleThreadExecutor();
+        mainHandler= new Handler(Looper.getMainLooper());
+        executorService.submit(()->{
+            if(key1.isEmpty()){
+                key1=generateKey();
             }
-*/
-
-
-
-/*
-        // Simuler un délai pour le chargement
-        new android.os.Handler().postDelayed(() -> {
-            showSuccessDialog();
-        }, 2000);
-
- */
+            if(key2.isEmpty()){
+                key2=generateIv();
+            }
+            Bitmap bitImage= BitmapFactory.decodeFile(image.getAbsolutePath());
+            Bitmap secretImage=LSBSteganography.hideMessage(bitImage,message,key1,key2);
+            saveBitmapToMediaGallery(this,secretImage);
+            mainHandler.post(()->{
+                hideLoadingDialog();
+                Intent intent = new Intent(EncryptActivity.this, EncryptActivityResult.class);
+                intent.putExtra("key1",key1);
+                intent.putExtra("key2",key2);
+                intent.putExtra("Uri",selectedImageUri.toString());
+                intent.putExtra("username",getIntent().getStringExtra("username"));
+                startActivity(intent);
+                finish();
+            });
+        });
     }
 
     private boolean isValidKey(String key) {
@@ -258,23 +231,27 @@ public class EncryptActivity extends AppCompatActivity {
     private void showLoadingDialog() {
         showBlurView();
 
-        Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.custom_error_dialog);
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        dialog.setCancelable(false);
+        loadingDialog = new Dialog(this);
+        loadingDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        loadingDialog.setContentView(R.layout.custom_error_dialog);
+        loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        loadingDialog.setCancelable(false);
 
-        ImageView icon = dialog.findViewById(R.id.dialogIcon);
-        TextView titleText = dialog.findViewById(R.id.dialogTitle);
-        TextView messageText = dialog.findViewById(R.id.dialogMessage);
-        Button btnOk = dialog.findViewById(R.id.btnOk);
+        ImageView icon = loadingDialog.findViewById(R.id.dialogIcon);
+        TextView titleText = loadingDialog.findViewById(R.id.dialogTitle);
+        TextView messageText = loadingDialog.findViewById(R.id.dialogMessage);
+        Button btnOk = loadingDialog.findViewById(R.id.btnOk);
 
         icon.setImageResource(R.drawable.password);
         titleText.setVisibility(View.GONE);
         messageText.setText("Encrypting...");
         btnOk.setVisibility(View.GONE);
 
-        dialog.show();
+        loadingDialog.show();
+    }
+    private void hideLoadingDialog(){
+        hideBlurView();
+        loadingDialog.dismiss();
     }
 
     private void showSuccessDialog() {
@@ -303,7 +280,7 @@ public class EncryptActivity extends AppCompatActivity {
     public Uri saveByteArrayToGallery(Context context, byte[] byteArray, String fileName) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
-        contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
 
         // For Android 10+ (API 29+), specify the directory
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -351,57 +328,7 @@ public class EncryptActivity extends AppCompatActivity {
         }
     }
 
-    private File getFileFromUri(Uri uri) {
-        String filePath;
-        if (DocumentsContract.isDocumentUri(this, uri)) {
-            // Handle document URI
-            String docId = DocumentsContract.getDocumentId(uri);
-            String[] split = docId.split(":");
-            String type = split[0];
 
-            if ("primary".equalsIgnoreCase(type)) {
-                filePath = Environment.getExternalStorageDirectory() + "/" + split[1];
-                return new File(filePath);
-            }
 
-            // Handle non-primary storage
-            Cursor cursor = getContentResolver().query(
-                    uri,
-                    new String[]{MediaStore.Images.Media.DATA},
-                    null, null, null
-            );
 
-            if (cursor != null && cursor.moveToFirst()) {
-                filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
-                cursor.close();
-                return new File(filePath);
-            }
-        } else if ("content".equalsIgnoreCase(uri.getScheme())) {
-            // Handle content URI
-            Cursor cursor = getContentResolver().query(uri,
-                    new String[]{MediaStore.Images.Media.DATA}, null, null, null);
-
-            if (cursor != null && cursor.moveToFirst()) {
-                filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
-                cursor.close();
-                return new File(filePath);
-            }
-        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
-            // Handle file URI
-            return new File(uri.getPath());
-        }
-
-        return null;
     }
-    private String getRealPathFromUri(Uri uri) {
-        String[] projection = {MediaStore.Images.Media.DATA};
-        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-        if (cursor == null) return null;
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        String path = cursor.getString(column_index);
-        cursor.close();
-        return path;
-    }
-
-}

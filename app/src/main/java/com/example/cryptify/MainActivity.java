@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         encryptButton.setOnClickListener(v -> {
             if (OfflineActivity.checkNetworkConnection(this)) {
                 Intent intent = new Intent(MainActivity.this, EncryptActivity.class);
+                intent.putExtra("username",getIntent().getStringExtra("username"));
                 startActivity(intent);
             } else {
                 OfflineActivity.checkAndShowOffline(this);
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         decryptButton.setOnClickListener(v -> {
             if (OfflineActivity.checkNetworkConnection(this)) {
                 Intent intent = new Intent(MainActivity.this, DecryptActivity.class);
+                intent.putExtra("username",getIntent().getStringExtra("username"));
                 startActivity(intent);
             } else {
                 OfflineActivity.checkAndShowOffline(this);

@@ -1,9 +1,16 @@
 package com.example.cryptify;
 
+import static com.example.cryptify.Helper.saveBitmapToMediaGallery;
+import static com.example.cryptify.Helper.uriToFile;
+
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
@@ -15,6 +22,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.cryptify.Steganography.LSBSteganography;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 public class DecryptActivity extends AppCompatActivity {
@@ -27,12 +41,16 @@ public class DecryptActivity extends AppCompatActivity {
     private LinearLayout imageSelectionContainer;
     private ImageView selectedImage;
     private ImageButton clearImageButton;
-    private EditText encryptedInput;
     private EditText key1Input, key2Input;
     private Button decryptButton;
     private ImageButton folderButton;
+    private ImageView imageShow;
     private View blurView;
     private Uri selectedImageUri;
+    private Dialog loadingDialog;
+
+    private ExecutorService executorService;
+    private Handler mainHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,19 +65,18 @@ public class DecryptActivity extends AppCompatActivity {
         imageSelectionContainer = findViewById(R.id.imageSelectionContainer);
         selectedImage = findViewById(R.id.selectedImage);
         clearImageButton = findViewById(R.id.clearImageButton);
-        encryptedInput = findViewById(R.id.encryptedInput);
         key1Input = findViewById(R.id.key1Input);
         key2Input = findViewById(R.id.key2Input);
         decryptButton = findViewById(R.id.decryptButton);
         folderButton = findViewById(R.id.folderButton);
         blurView = findViewById(R.id.blurView);
+        imageShow=findViewById(R.id.imageShow);
     }
 
     private void setupClickListeners() {
         backButton.setOnClickListener(v -> finish());
         imageSelectionContainer.setOnClickListener(v -> openImagePicker());
         clearImageButton.setOnClickListener(v -> clearSelectedImage());
-        folderButton.setOnClickListener(v -> openFilePicker());
         decryptButton.setOnClickListener(v -> handleDecryption());
     }
 
@@ -70,14 +87,8 @@ public class DecryptActivity extends AppCompatActivity {
 
     private void clearSelectedImage() {
         selectedImageUri = null;
-        selectedImage.setImageResource(R.drawable.image);
+        imageShow.setImageURI(null);
         clearImageButton.setVisibility(View.GONE);
-    }
-
-    private void openFilePicker() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("text/*");
-        startActivityForResult(intent, PICK_FILE_REQUEST);
     }
 
     @Override
@@ -87,7 +98,8 @@ public class DecryptActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             selectedImageUri = data.getData();
             if (selectedImageUri != null) {
-                selectedImage.setImageURI(selectedImageUri);
+                imageShow =findViewById(R.id.imageShow);
+                imageShow.setImageURI(selectedImageUri);
                 clearImageButton.setVisibility(View.VISIBLE);
                 // Vérifier le format de l'image
                 String mimeType = getContentResolver().getType(selectedImageUri);
@@ -96,34 +108,46 @@ public class DecryptActivity extends AppCompatActivity {
                     clearSelectedImage();
                 }
             }
-        } else if (requestCode == PICK_FILE_REQUEST && resultCode == RESULT_OK && data != null) {
-            Uri fileUri = data.getData();
-            // TODO: Lire le contenu du fichier et le mettre dans encryptedInput
-            encryptedInput.setText("Contenu chiffré du fichier");
         }
     }
 
+
     private void handleDecryption() {
-        String encryptedText = encryptedInput.getText().toString().trim();
         String key1 = key1Input.getText().toString().trim();
         String key2 = key2Input.getText().toString().trim();
 
-        if (encryptedText.isEmpty()) {
-            showErrorDialog("text to Decrypt", "is empty");
+        if(selectedImageUri==null){
+           showErrorDialog("incomplete","please choose a picture");
+        }
+        if (key1.isEmpty() || key2.isEmpty()) {
+            showErrorDialog("incomplete", "please fill in all the keys");
             return;
         }
-
-        if (!isValidKey(key1) || !isValidKey(key2)) {
-            showErrorDialog("wrong key", "");
+        File image;
+        try {
+            image = uriToFile(this, selectedImageUri);
+        } catch (IOException e) {
+            showErrorDialog("Error", "Error converting URI to file: " + e.getMessage());
+            // Optionally, you might want to stop further execution here
             return;
         }
-
         showLoadingDialog();
+
+        executorService= Executors.newSingleThreadExecutor();
+        mainHandler= new Handler(Looper.getMainLooper());
+        executorService.submit(()->{
+            Bitmap bitImage= BitmapFactory.decodeFile(image.getAbsolutePath());
+            String decryptedMessage=LSBSteganography.extractMessage(bitImage,key1,key2);
+            mainHandler.post(()->{
+                hideLoadingDialog();
+                Intent intent=new Intent(DecryptActivity.this, DecryptActivityResult.class);
+                intent.putExtra("message",decryptedMessage);
+                startActivity(intent);
+                finish();
+            });
+        });
         // TODO: Implémenter la logique de déchiffrement
-        // Simuler un délai pour le chargement
-        new android.os.Handler().postDelayed(() -> {
-            showSuccessDialog("Message déchiffré");
-        }, 2000);
+
     }
 
     private boolean isValidKey(String key) {
@@ -180,27 +204,6 @@ public class DecryptActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void showLoadingDialog() {
-        showBlurView();
-
-        Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.custom_error_dialog);
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        dialog.setCancelable(false);
-
-        ImageView icon = dialog.findViewById(R.id.dialogIcon);
-        TextView titleText = dialog.findViewById(R.id.dialogTitle);
-        TextView messageText = dialog.findViewById(R.id.dialogMessage);
-        Button btnOk = dialog.findViewById(R.id.btnOk);
-
-        icon.setImageResource(R.drawable.decrypt);
-        titleText.setVisibility(View.GONE);
-        messageText.setText("Decrypting...");
-        btnOk.setVisibility(View.GONE);
-
-        dialog.show();
-    }
 
     private void showSuccessDialog(String decryptedText) {
         Dialog dialog = new Dialog(this);
@@ -222,5 +225,32 @@ public class DecryptActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+
+    private void showLoadingDialog() {
+        showBlurView();
+
+        loadingDialog = new Dialog(this);
+        loadingDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        loadingDialog.setContentView(R.layout.custom_error_dialog);
+        loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        loadingDialog.setCancelable(false);
+
+        ImageView icon = loadingDialog.findViewById(R.id.dialogIcon);
+        TextView titleText = loadingDialog.findViewById(R.id.dialogTitle);
+        TextView messageText = loadingDialog.findViewById(R.id.dialogMessage);
+        Button btnOk = loadingDialog.findViewById(R.id.btnOk);
+
+        icon.setImageResource(R.drawable.password);
+        titleText.setVisibility(View.GONE);
+        messageText.setText("Decrypting...");
+        btnOk.setVisibility(View.GONE);
+
+        loadingDialog.show();
+    }
+    private void hideLoadingDialog(){
+        hideBlurView();
+        loadingDialog.dismiss();
     }
 }

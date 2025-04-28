@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white"
     android:padding="20dp">
 
@@ -12,7 +12,6 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/back_arrow"
         android:tint="@color/purple" />
@@ -23,16 +22,19 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_below="@id/backButton"
+        android:layout_marginTop="-20dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="-10dp"
         android:src="@drawable/logo_1" />
-
-    <!-- Text to Decrypt Input -->
-
-    <!-- Encrypted Text Input -->
 
     <!-- Image Selection Container -->
 
+    <!-- Key 1 Input -->
+
+    <!-- Key 2 Input -->
+
+    <!-- Message Input -->
+
+    <!-- Encrypt Button -->
     <ImageButton
         android:id="@+id/clearImageButton"
         android:layout_width="24dp"
@@ -50,8 +52,8 @@
 
     <LinearLayout
         android:id="@+id/imageSelectionContainer"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_below="@id/logo"
         android:layout_marginTop="14dp"
         android:layout_centerHorizontal="true"
@@ -61,110 +63,113 @@
         android:padding="5dp">
 
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:id="@+id/selectedImage"
-                android:layout_width="110dp"
-                android:layout_height="110dp"
-                android:src="@drawable/image" />
-
-        </FrameLayout>
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:fontFamily="@font/robocode"
-            android:text="select an image"
-            android:textColor="@color/white"
-            android:textSize="12sp" />
-    </LinearLayout>
+   </LinearLayout>
 
     <ImageView
         android:id="@+id/imageShow"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_toRightOf="@id/imageSelectionContainer"
         android:layout_above="@id/imageSelectionContainer"
-        android:layout_marginLeft="-160dp"
-        android:layout_marginBottom="-174dp"
+        android:layout_marginLeft="-200dp"
+        android:layout_marginBottom="-214dp"
         android:scaleType="fitXY"
         />
-    <!-- Key 1 Input -->
 
-    <!-- Key 2 Input -->
+    <TextView
+        android:id="@+id/key1"
+        android:layout_marginTop="30dp"
+        android:layout_below="@id/imageSelectionContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/robocode"
+        android:text="key1"
+        android:textColor="#5400FF"
+        android:textSize="20dp" />
+
     <LinearLayout
+        android:layout_below="@id/key1"
         android:id="@+id/key1Container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/imageSelectionContainer"
-        android:layout_marginTop="24dp"
-        android:orientation="vertical">
+        android:layout_height="50dp"
+        android:background="@drawable/input_background"
+        android:backgroundTint="#5400FF"
+        android:orientation="vertical"
+        android:paddingRight="6dp"
+        android:paddingLeft="6dp"
+        >
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/robocode"
-            android:text="Key 1"
-            android:textColor="#5400FF"
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/key1Input"
+            android:id="@+id/Key1Text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="@drawable/edit_text_background"
+            android:layout_marginRight="40dp"
+            android:layout_height="35dp"
             android:fontFamily="@font/robocode"
-            android:hint="16 characters or you can leave it blank"
-            android:inputType="text"
-            android:padding="12dp"
-            android:textColor="@color/black"
-            android:textColorHint="#45000000"
+            android:textColor="#85FFFFFF"
             android:textSize="14sp" />
+
+        <ImageButton
+            android:id="@+id/copyKey1Button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="-30dp"
+            android:layout_marginRight="5dp"
+            android:layout_gravity="end"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/copy" />
+
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/key2"
+        android:layout_marginTop="14dp"
+        android:layout_below="@id/key1Container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/robocode"
+        android:text="key2"
+        android:textColor="#5400FF"
+        android:textSize="20dp" />
 
     <LinearLayout
+        android:layout_below="@id/key2"
         android:id="@+id/key2Container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/key1Container"
-        android:layout_marginTop="7dp"
-        android:orientation="vertical">
+        android:layout_height="50dp"
+        android:background="@drawable/input_background"
+        android:backgroundTint="#5400FF"
+        android:orientation="vertical"
+        android:paddingRight="6dp"
+        android:paddingLeft="6dp"
+        >
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Key 2"
-            android:fontFamily="@font/robocode"
-            android:textColor="#5400FF"
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/key2Input"
+            android:id="@+id/Key2Text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="@drawable/edit_text_background"
+            android:layout_marginRight="40dp"
+            android:layout_height="35dp"
             android:fontFamily="@font/robocode"
-            android:hint="16 characters or you can leave it blank"
-            android:inputType="text"
-            android:padding="12dp"
-            android:textColor="@color/black"
-            android:textColorHint="#45000000"
+            android:textColor="#85FFFFFF"
             android:textSize="14sp" />
+
+        <ImageButton
+            android:id="@+id/copyKey2Button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="-30dp"
+            android:layout_marginRight="5dp"
+            android:layout_gravity="end"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/copy" />
+
     </LinearLayout>
 
-    <!-- Decrypt Button -->
 
     <!-- Copyright -->
-
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/decryptButton"
+        android:id="@+id/okButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/copyright"
@@ -172,7 +177,7 @@
         android:background="@drawable/button_background"
         android:fontFamily="@font/robocode"
         android:padding="16dp"
-        android:text="Decrypt"
+        android:text="OK"
         android:textColor="@color/white"
         android:textSize="16sp" />
 
@@ -182,23 +187,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:fontFamily="@font/robocode"
         android:text="Copyright 2025 ©"
         android:textColor="@color/grey"
         android:textSize="12sp" />
-
-    <!-- Folder Button -->
-    <ImageButton
-        android:id="@+id/folderButton"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="3dp"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/rounded_button_background"
-        android:padding="16dp"
-        android:src="@drawable/folder"
-        android:tint="@color/white" />
 
     <!-- Blur View -->
     <View
