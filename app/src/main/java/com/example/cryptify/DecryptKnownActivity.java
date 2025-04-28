@@ -26,6 +26,8 @@ import com.example.cryptify.Steganography.LSBSteganography;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -55,7 +57,6 @@ public class DecryptKnownActivity extends AppCompatActivity {
         Uri uri=Uri.parse(path);
 
         imageView.setImageURI(uri);
-
         key1Text.setText(key);
         key2Text.setText(iv);
     }

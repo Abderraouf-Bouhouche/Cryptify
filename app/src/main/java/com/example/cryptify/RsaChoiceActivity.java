@@ -20,7 +20,6 @@ public class RsaChoiceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_rsa_choice);
 
         // Vérifier la connexion au démarrage
-        OfflineActivity.checkAndShowOffline(this);
 
         initializeViews();
         setupClickListeners();
@@ -34,7 +33,6 @@ public class RsaChoiceActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         encryptButton.setOnClickListener(v -> {
-            if (OfflineActivity.checkNetworkConnection(this)) {
                 String username = getIntent().getStringExtra("username");
                 if (username == null) {
                     showErrorDialog("Error", "User information not found");
@@ -43,13 +41,9 @@ public class RsaChoiceActivity extends AppCompatActivity {
                 
                 Intent intent = new Intent(RsaChoiceActivity.this, RsaEncryptionActivity.class);
                 startActivity(intent);
-            } else {
-                OfflineActivity.checkAndShowOffline(this);
-            }
         });
 
         decryptButton.setOnClickListener(v -> {
-            if (OfflineActivity.checkNetworkConnection(this)) {
                 String username = getIntent().getStringExtra("username");
                 if (username == null) {
                     showErrorDialog("Error", "User information not found");
@@ -58,9 +52,6 @@ public class RsaChoiceActivity extends AppCompatActivity {
                 Intent intent = new Intent(RsaChoiceActivity.this, RsaDecryptionActivity.class);
                 intent.putExtra("username",username);
                 startActivity(intent);
-            } else {
-                OfflineActivity.checkAndShowOffline(this);
-            }
         });
 
         backButton.setOnClickListener(v -> finish());
@@ -87,7 +78,6 @@ public class RsaChoiceActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // Vérifier la connexion à chaque retour sur l'activité
-        OfflineActivity.checkAndShowOffline(this);
     }
 
     @Override

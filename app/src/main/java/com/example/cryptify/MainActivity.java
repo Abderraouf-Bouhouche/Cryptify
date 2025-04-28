@@ -18,7 +18,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Vérifier la connexion au démarrage
-        OfflineActivity.checkAndShowOffline(this);
 
         initializeViews();
         setupClickListeners();
@@ -33,43 +32,27 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         encryptButton.setOnClickListener(v -> {
-            if (OfflineActivity.checkNetworkConnection(this)) {
                 Intent intent = new Intent(MainActivity.this, EncryptActivity.class);
                 intent.putExtra("username",getIntent().getStringExtra("username"));
                 startActivity(intent);
-            } else {
-                OfflineActivity.checkAndShowOffline(this);
-            }
         });
 
         decryptButton.setOnClickListener(v -> {
-            if (OfflineActivity.checkNetworkConnection(this)) {
                 Intent intent = new Intent(MainActivity.this, DecryptActivity.class);
                 intent.putExtra("username",getIntent().getStringExtra("username"));
                 startActivity(intent);
-            } else {
-                OfflineActivity.checkAndShowOffline(this);
-            }
         });
 
         rsaKeysButton.setOnClickListener(v -> {
-            if (OfflineActivity.checkNetworkConnection(this)) {
                 Intent intent = new Intent(MainActivity.this, RsaKeysActivity.class);
                 intent.putExtra("username", getIntent().getStringExtra("username"));
                 startActivity(intent);
-            } else {
-                OfflineActivity.checkAndShowOffline(this);
-            }
         });
 
         rsaEncryptionButton.setOnClickListener(v -> {
-            if (OfflineActivity.checkNetworkConnection(this)) {
                 Intent intent = new Intent(MainActivity.this, RsaChoiceActivity.class);
                 intent.putExtra("username", getIntent().getStringExtra("username"));
                 startActivity(intent);
-            } else {
-                OfflineActivity.checkAndShowOffline(this);
-            }
         });
     }
 
@@ -77,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // Vérifier la connexion à chaque retour sur l'activité
-        OfflineActivity.checkAndShowOffline(this);
     }
 
     @Override
