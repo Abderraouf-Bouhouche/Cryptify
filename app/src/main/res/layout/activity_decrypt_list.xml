@@ -66,8 +66,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|bottom"
             android:fontFamily="@font/robocode"
-            android:text="\@Copyrights 2025"
-            android:textColor="#4F808080"
+            android:text="Copyright 2025 ©"
+            android:textColor="@color/grey"
             android:textSize="16sp" />
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

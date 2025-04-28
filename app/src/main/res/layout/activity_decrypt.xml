@@ -182,6 +182,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:fontFamily="@font/robocode"
         android:text="Copyright 2025 ©"
         android:textColor="@color/grey"
         android:textSize="12sp" />
